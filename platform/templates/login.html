@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% block title %}登入 | 保險員證照考試平台{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="login-page">
+  <div class="login-bg-orb orb1"></div>
+  <div class="login-bg-orb orb2"></div>
+
+  <div class="login-container">
+    <div class="login-header">
+      <div class="login-logo">⚖</div>
+      <h1 class="login-title">保險員證照</h1>
+      <p class="login-subtitle">智慧學習・精準備考</p>
+    </div>
+
+    {# ★ Batch B: 免密碼快速登入卡片 #}
+    {% if quick_users %}
+    <div class="quick-login-section">
+      <p class="quick-login-hint">點擊使用者卡片直接登入</p>
+      <div class="quick-user-grid">
+        {% for u in quick_users %}
+        <button class="quick-user-card" onclick="quickLogin('{{ u.username }}')">
+          <div class="quick-user-avatar">
+            {% if u.username == 'Humble' %}👨
+            {% elif u.username == 'Chrisa' %}👩
+            {% else %}👤{% endif %}
+          </div>
+          <div class="quick-user-name">{{ u.username }}</div>
+        </button>
+        {% endfor %}
+      </div>
+      <div class="quick-login-error" id="quickLoginError"></div>
+    </div>
+
+    {# 進階登入(摺疊起來,點才展開) #}
+    <button class="advanced-login-toggle" onclick="toggleAdvanced()">
+      <span id="advancedToggleText">▾ 使用其他帳號登入 / 註冊</span>
+    </button>
+
+    <div class="advanced-login-panel hidden" id="advancedPanel">
+    {% endif %}
+
+    <!-- Tab 切換 -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('login')">登入</button>
+      <button class="tab-btn" onclick="switchTab('register')">註冊</button>
+      <div class="tab-indicator" id="tabIndicator"></div>
+    </div>
+
+    <!-- 登入表單 -->
+    <div class="form-panel" id="loginPanel">
+      <div class="input-group">
+        <label class="input-label">帳號</label>
+        <input type="text" id="loginUsername" class="input-field" placeholder="請輸入帳號" autocomplete="username">
+      </div>
+      <div class="input-group">
+        <label class="input-label">密碼</label>
+        <input type="password" id="loginPassword" class="input-field" placeholder="請輸入密碼" autocomplete="current-password">
+      </div>
+      <div class="error-msg" id="loginError"></div>
+      <button class="btn-primary" onclick="doLogin()">
+        <span id="loginBtnText">登入</span>
+      </button>
+    </div>
+
+    <!-- 註冊表單 -->
+    <div class="form-panel hidden" id="registerPanel">
+      <div class="input-group">
+        <label class="input-label">帳號</label>
+        <input type="text" id="regUsername" class="input-field" placeholder="設定帳號(至少3字元)" autocomplete="username">
+      </div>
+      <div class="input-group">
+        <label class="input-label">信箱(選填)</label>
+        <input type="email" id="regEmail" class="input-field" placeholder="your@email.com" autocomplete="email">
+      </div>
+      <div class="input-group">
+        <label class="input-label">密碼</label>
+        <input type="password" id="regPassword" class="input-field" placeholder="設定密碼(至少6字元)" autocomplete="new-password">
+      </div>
+      <div class="error-msg" id="registerError"></div>
+      <button class="btn-primary" onclick="doRegister()">
+        <span id="regBtnText">建立帳號</span>
+      </button>
+    </div>
+
+    {% if quick_users %}
+    </div> {# /advancedPanel #}
+    {% endif %}
+
+    <p class="login-footer">保險從業人員專用學習系統</p>
+  </div>
+</div>
+
+<script>
+{# ★ Batch B 新增:快速登入 #}
+async function quickLogin(username) {
+  const errEl = document.getElementById('quickLoginError');
+  errEl.textContent = '';
+  try {
+    const res = await fetch(`/login/quick/${encodeURIComponent(username)}`, {method: 'POST'});
+    const data = await res.json();
+    if (data.success) {
+      window.location.href = data.redirect || '/dashboard';
+    } else {
+      errEl.textContent = data.message || '登入失敗';
+    }
+  } catch (e) {
+    errEl.textContent = '連線失敗,請重試';
+  }
+}
+
+function toggleAdvanced() {
+  const panel = document.getElementById('advancedPanel');
+  const tog = document.getElementById('advancedToggleText');
+  const hidden = panel.classList.toggle('hidden');
+  tog.textContent = hidden ? '▾ 使用其他帳號登入 / 註冊' : '▴ 收起';
+}
+
+function switchTab(tab) {
+  const loginPanel = document.getElementById('loginPanel');
+  const registerPanel = document.getElementById('registerPanel');
+  const tabs = document.querySelectorAll('.tab-btn');
+  const indicator = document.getElementById('tabIndicator');
+
+  if (tab === 'login') {
+    loginPanel.classList.remove('hidden');
+    registerPanel.classList.add('hidden');
+    tabs[0].classList.add('active');
+    tabs[1].classList.remove('active');
+    if (indicator) indicator.style.transform = 'translateX(0)';
+  } else {
+    loginPanel.classList.add('hidden');
+    registerPanel.classList.remove('hidden');
+    tabs[0].classList.remove('active');
+    tabs[1].classList.add('active');
+    if (indicator) indicator.style.transform = 'translateX(100%)';
+  }
+}
+
+async function doLogin() {
+  const btn = document.getElementById('loginBtnText');
+  const err = document.getElementById('loginError');
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  if (!username || !password) { err.textContent = '請填寫帳號與密碼'; return; }
+  btn.textContent = '登入中…';
+
+  const res = await fetch('/login', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username, password})
+  });
+  const data = await res.json();
+  if (data.success) {
+    window.location.href = '/dashboard';
+  } else {
+    err.textContent = data.message || '登入失敗';
+    btn.textContent = '登入';
+  }
+}
+
+async function doRegister() {
+  const btn = document.getElementById('regBtnText');
+  const err = document.getElementById('registerError');
+  const username = document.getElementById('regUsername').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+
+  if (username.length < 3) { err.textContent = '帳號至少需要 3 個字元'; return; }
+  if (password.length < 6) { err.textContent = '密碼至少需要 6 個字元'; return; }
+  btn.textContent = '建立中…';
+
+  const res = await fetch('/register', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({username, email, password})
+  });
+  const data = await res.json();
+  if (data.success) {
+    window.location.href = '/dashboard';
+  } else {
+    err.textContent = data.message || '註冊失敗';
+    btn.textContent = '建立帳號';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const loginPanel = document.getElementById('loginPanel');
+    const advPanel = document.getElementById('advancedPanel');
+    if (!advPanel || advPanel.classList.contains('hidden')) return;
+    if (loginPanel && !loginPanel.classList.contains('hidden')) doLogin();
+    else doRegister();
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,316 @@
+{% extends 'base.html' %}
+{% block title %}主控台 | 保險員證照考試平台{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+
+  <!-- 歡迎區 -->
+  <div class="welcome-section">
+    <div class="welcome-text">
+      <p class="welcome-greeting">歡迎回來</p>
+      <h2 class="welcome-name">{{ user.username }}</h2>
+    </div>
+    <div class="welcome-badge">
+      <span class="badge-icon">🎯</span>
+    </div>
+  </div>
+
+  <!-- 統計卡片 -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ total_questions }}</div>
+      <div class="stat-label">題庫題數</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ total_sessions }}</div>
+      <div class="stat-label">測驗次數</div>
+    </div>
+    <div class="stat-card" id="avgScoreCard">
+      <div class="stat-value" id="avgScore">—</div>
+      <div class="stat-label">平均分數</div>
+    </div>
+  </div>
+
+  {# Batch C: 收藏 / 精熟數量 #}
+  <div class="stats-row">
+    <div class="stat-card stat-mini">
+      <div class="stat-value" style="color:var(--gold,#C9A243)">⭐ {{ favorite_count }}</div>
+      <div class="stat-label">收藏題</div>
+    </div>
+    <div class="stat-card stat-mini">
+      <div class="stat-value" style="color:#3FB950">🎯 {{ mastered_count }}</div>
+      <div class="stat-label">已精熟</div>
+    </div>
+  </div>
+
+  <!-- 開始測驗區 -->
+  <div class="section-card">
+    <h3 class="section-title">
+      <span class="section-icon">📝</span>開始測驗
+    </h3>
+
+    <!-- 出題數量 -->
+    <div class="setting-group">
+      <label class="setting-label">出題數量</label>
+      <div class="count-selector">
+        <button class="count-btn" onclick="setCount(3, event)">3題</button>
+        <button class="count-btn" onclick="setCount(5, event)">5題</button>
+        <button class="count-btn active" onclick="setCount(10, event)">10題</button>
+        <button class="count-btn" onclick="setCount(20, event)">20題</button>
+        <button class="count-btn" onclick="setCount(30, event)">30題</button>
+        <button class="count-btn" onclick="setCount(50, event)">50題</button>
+      </div>
+      <input type="hidden" id="quizCount" value="10">
+    </div>
+
+    <!-- 測驗模式 -->
+    <div class="setting-group">
+      <label class="setting-label">測驗模式</label>
+      <div class="mode-selector">
+        <div class="mode-card active" id="modeRandom" onclick="selectMode('random')">
+          <div class="mode-icon">🎲</div>
+          <div class="mode-name">隨機出題</div>
+          <div class="mode-desc">全題庫隨機</div>
+        </div>
+        <div class="mode-card" id="modeUnit" onclick="selectMode('unit')">
+          <div class="mode-icon">📚</div>
+          <div class="mode-name">範圍出題</div>
+          <div class="mode-desc">指定科目章節</div>
+        </div>
+        <div class="mode-card" id="modeWeak" onclick="selectMode('weak')">
+          <div class="mode-icon">🎯</div>
+          <div class="mode-name">弱點加強</div>
+          <div class="mode-desc">系統判斷弱項</div>
+        </div>
+        <div class="mode-card" id="modeFavorite" onclick="selectMode('favorite')">
+          <div class="mode-icon">⭐</div>
+          <div class="mode-name">收藏題</div>
+          <div class="mode-desc">複習收藏題</div>
+        </div>
+      </div>
+    </div>
+
+    {# 科目 + 章節兩階下拉 #}
+    <div class="setting-group hidden" id="unitSelector">
+      <label class="setting-label">選擇範圍</label>
+
+      <select id="subjectSelect" class="input-field" onchange="onSubjectChange()" style="margin-bottom:8px">
+        <option value="all">全部科目</option>
+        {% for subj in subject_unit_map.keys() %}
+        <option value="{{ subj }}">{{ subj }} ({{ subject_count.get(subj, 0) }} 題)</option>
+        {% endfor %}
+      </select>
+
+      <div class="unit-search-wrap">
+        <input type="text" id="unitSearch" class="input-field"
+               placeholder="🔍 輸入關鍵字搜尋章節…"
+               oninput="filterUnits(this.value)"
+               autocomplete="off">
+      </div>
+
+      <div class="unit-list" id="unitList">
+        <div class="unit-item active" data-value="all" onclick="selectUnit(this)">
+          <span class="unit-name">全部章節隨機出題</span>
+        </div>
+      </div>
+      <input type="hidden" id="selectedUnit" value="all">
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">
+      <span>開始測驗</span>
+      <span class="btn-arrow">→</span>
+    </button>
+  </div>
+
+  <!-- 弱點分析 -->
+  {% if weak_data %}
+  <div class="section-card">
+    <h3 class="section-title">
+      <span class="section-icon">📊</span>弱點分析
+    </h3>
+    {% for w in weak_data %}
+    <div class="weak-item">
+      <div class="weak-header">
+        <span class="weak-unit">{{ w.unit }}</span>
+        <span class="weak-accuracy {% if w.accuracy < 60 %}bad{% elif w.accuracy < 80 %}warn{% else %}good{% endif %}">
+          {{ w.accuracy }}%
+        </span>
+      </div>
+      <div class="weak-bar-bg">
+        <div class="weak-bar {% if w.accuracy < 60 %}bad{% elif w.accuracy < 80 %}warn{% else %}good{% endif %}"
+             style="width: {{ w.accuracy }}%"></div>
+      </div>
+      <div class="weak-detail">答錯 {{ w.wrong }} / 共 {{ w.total }} 題</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- 管理員:載入題庫 -->
+  <div class="section-card admin-section">
+    <h3 class="section-title">
+      <span class="section-icon">⚙️</span>系統管理
+    </h3>
+    <button class="btn-secondary" onclick="loadQuestions()">
+      <span id="loadBtnText">📥 從題庫檔案載入題目</span>
+    </button>
+    <div class="admin-msg" id="loadMsg"></div>
+  </div>
+
+</div>
+
+<script>
+let selectedMode = 'random';
+let quizCount = 10;
+let selectedSubject = 'all';
+
+// Batch C: subject_unit_map 帶入前端
+const subjectUnitMap = {{ subject_unit_map | tojson }};
+
+// ★ Batch C: 中文章節數字 → 阿拉伯數字,用於排序
+const CHINESE_NUM = {
+  '一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10,
+  '十一':11,'十二':12,'十三':13,'十四':14,'十五':15,'十六':16,'十七':17,'十八':18,'十九':19,'二十':20
+};
+
+function unitOrder(unitName) {
+  // 抓「第X章」「第X節」這類前綴的中文數字,轉成 100*章 + 節 用於排序
+  // 例如「第一章 人身保險契約」→ 100; 「第二章 ...」→ 200
+  if (!unitName) return 9999;
+  const m = unitName.match(/第\s*([一二三四五六七八九十]+)\s*[章節]/);
+  if (m) {
+    const num = CHINESE_NUM[m[1]] || 999;
+    return num * 100;
+  }
+  // 數字章節 (例如 "第1章")
+  const m2 = unitName.match(/第\s*(\d+)\s*[章節]/);
+  if (m2) return parseInt(m2[1], 10) * 100;
+  return 9999;
+}
+
+function renderUnitList() {
+  // 根據目前 selectedSubject 重新渲染章節列表
+  const listEl = document.getElementById('unitList');
+  // 保留「全部」這個固定第一項
+  listEl.innerHTML = '<div class="unit-item active" data-value="all" onclick="selectUnit(this)"><span class="unit-name">全部章節隨機出題</span></div>';
+
+  // 集結要顯示的章節 [(unit, subject), ...]
+  const pairs = [];
+  if (selectedSubject === 'all') {
+    Object.keys(subjectUnitMap).forEach(subj => {
+      subjectUnitMap[subj].forEach(unit => pairs.push([unit, subj]));
+    });
+  } else if (subjectUnitMap[selectedSubject]) {
+    subjectUnitMap[selectedSubject].forEach(unit => pairs.push([unit, selectedSubject]));
+  }
+
+  // ★ Batch C: 按章節順序排
+  pairs.sort((a, b) => {
+    const oa = unitOrder(a[0]);
+    const ob = unitOrder(b[0]);
+    if (oa !== ob) return oa - ob;
+    return a[0].localeCompare(b[0], 'zh-TW');
+  });
+
+  pairs.forEach(([unit, subj]) => {
+    const div = document.createElement('div');
+    div.className = 'unit-item';
+    div.dataset.value = unit;
+    div.dataset.subject = subj;
+    div.onclick = function() { selectUnit(this); };
+    div.innerHTML = `<span class="unit-name">${unit}</span><span class="unit-code" style="font-size:11px;color:var(--text-3,#888);margin-left:6px">${subj}</span>`;
+    listEl.appendChild(div);
+  });
+
+  // 重設選擇
+  document.getElementById('selectedUnit').value = 'all';
+  document.getElementById('unitSearch').value = '';
+}
+
+function setCount(n, evt) {
+  quizCount = n;
+  document.getElementById('quizCount').value = n;
+  document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+  if (evt && evt.target) evt.target.classList.add('active');
+}
+
+function selectMode(mode) {
+  selectedMode = mode;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+  const cap = mode.charAt(0).toUpperCase() + mode.slice(1);
+  const el = document.getElementById('mode' + cap);
+  if (el) el.classList.add('active');
+  document.getElementById('unitSelector').classList.toggle('hidden', mode !== 'unit');
+}
+
+function onSubjectChange() {
+  selectedSubject = document.getElementById('subjectSelect').value;
+  renderUnitList();
+}
+
+function selectUnit(el) {
+  document.querySelectorAll('.unit-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('selectedUnit').value = el.dataset.value;
+  document.getElementById('unitSearch').value = '';
+  filterUnits('');
+}
+
+function filterUnits(keyword) {
+  const kw = keyword.trim().toLowerCase();
+  document.querySelectorAll('.unit-item').forEach(item => {
+    const val = item.dataset.value;
+    if (val === 'all') { item.style.display = ''; return; }
+    const text = item.textContent.toLowerCase();
+    item.style.display = (!kw || text.includes(kw)) ? '' : 'none';
+  });
+}
+
+function startQuiz() {
+  let params;
+  if (selectedMode === 'favorite') {
+    params = { mode: 'favorite', count: quizCount, focus_favorite: true };
+  } else if (selectedMode === 'weak') {
+    params = { mode: 'weak', count: quizCount, focus_weak: true };
+  } else if (selectedMode === 'unit') {
+    params = {
+      mode: 'unit',
+      subject: selectedSubject,
+      unit: document.getElementById('selectedUnit').value,
+      count: quizCount
+    };
+  } else {
+    params = { mode: 'random', count: quizCount };
+  }
+  sessionStorage.setItem('quizParams', JSON.stringify(params));
+  window.location.href = '/quiz';
+}
+
+async function loadQuestions() {
+  const btn = document.getElementById('loadBtnText');
+  const msg = document.getElementById('loadMsg');
+  btn.textContent = '載入中…';
+  const res = await fetch('/api/load-questions', {method: 'POST'});
+  const data = await res.json();
+  if (data.success) {
+    let detail = '';
+    if (data.files && data.files.length > 1) {
+      detail = '\n各檔:' + data.files.map(f => `${f.file}(載入 ${f.loaded}, 略過 ${f.skipped})`).join('; ');
+    }
+    msg.textContent = `✅ 成功載入 ${data.loaded} 題(略過重複 ${data.skipped} 題)${detail}`;
+    msg.style.color = 'var(--gold)';
+    setTimeout(() => location.reload(), 2000);
+  } else {
+    msg.textContent = `❌ ${data.error}`;
+    msg.style.color = '#f85149';
+  }
+  btn.textContent = '📥 從題庫檔案載入題目';
+}
+
+// 初始化:渲染章節 + 抓平均分數
+renderUnitList();
+fetch('/api/stats').then(r => r.json()).then(d => {
+  document.getElementById('avgScore').textContent = d.avg_score ? d.avg_score + '%' : '—';
+});
+</script>
+{% endblock %}

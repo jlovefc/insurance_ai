@@ -1,0 +1,100 @@
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
+
+db = SQLAlchemy()
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True)
+    password_hash = db.Column(db.String(256), nullable=True)  # ★ Batch A: 允許 NULL,免密碼帳號
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    sessions = db.relationship('QuizSession', backref='user', lazy=True)
+    weak_areas = db.relationship('WeakArea', backref='user', lazy=True)
+    is_admin = db.Column(db.Integer, default=0)  # 管理員旗標
+
+
+class Question(db.Model):
+    __tablename__ = 'questions'
+    id = db.Column(db.Integer, primary_key=True)
+    subject = db.Column(db.String(50), nullable=True, index=True, default='未分類')
+    content = db.Column(db.Text, nullable=False)
+    options = db.Column(db.Text, nullable=False)
+    correct_answer = db.Column(db.String(10), nullable=False)
+    unit = db.Column(db.String(100), default='未分類')
+    explanation = db.Column(db.Text, default='')
+    difficulty = db.Column(db.String(20), default='medium')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class QuizSession(db.Model):
+    __tablename__ = 'quiz_sessions'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    mode = db.Column(db.String(20), default='random')
+    unit_name = db.Column(db.String(100), default='all')
+    score = db.Column(db.Integer, default=0)
+    total_questions = db.Column(db.Integer, default=0)
+    start_time = db.Column(db.DateTime, default=datetime.utcnow)
+    end_time = db.Column(db.DateTime)
+
+    answers = db.relationship('UserAnswer', backref='session', lazy=True)
+
+
+class UserAnswer(db.Model):
+    __tablename__ = 'user_answers'
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey('quiz_sessions.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
+    user_answer = db.Column(db.String(10))
+    is_correct = db.Column(db.Boolean, default=False)
+    time_spent = db.Column(db.Integer, default=0)
+
+    question = db.relationship('Question', backref='user_answers')
+
+
+class WeakArea(db.Model):
+    __tablename__ = 'weak_areas'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    unit = db.Column(db.String(100), nullable=False)
+    wrong_count = db.Column(db.Integer, default=0)
+    total_count = db.Column(db.Integer, default=0)
+    last_tested = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# ★ Batch A 新增:記錄每個使用者對每題的「收藏 / 精熟」狀態
+class UserQuestionMark(db.Model):
+    __tablename__ = 'user_question_marks'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
+    mark_type = db.Column(db.String(20), nullable=True)  # 'favorite' / 'mastered' / NULL
+    correct_streak = db.Column(db.Integer, default=0)
+    last_practiced = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'question_id', name='uq_user_question'),
+        db.Index('idx_uqm_user_mark', 'user_id', 'mark_type'),
+    )
+
+    user = db.relationship('User', backref='question_marks')
+    question = db.relationship('Question', backref='user_marks')
+
+
+class UserExplanation(db.Model):
+    """使用者寫的解說 - 每題可多筆,管理員可編所有,一般使用者只能編自己的"""
+    __tablename__ = 'user_explanations'
+    id = db.Column(db.Integer, primary_key=True)
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False, index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    report_count = db.Column(db.Integer, default=0)
+
+    user = db.relationship('User', backref='explanations')
+    question = db.relationship('Question', backref='user_explanations')
+

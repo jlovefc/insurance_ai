@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% block title %}主控台 | 保險員證照考試平台{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+
+  <!-- 歡迎區 -->
+  <div class="welcome-section">
+    <div class="welcome-text">
+      <p class="welcome-greeting">歡迎回來</p>
+      <h2 class="welcome-name">{{ user.username }}</h2>
+    </div>
+    <div class="welcome-badge">
+      <span class="badge-icon">🎯</span>
+    </div>
+  </div>
+
+  <!-- 統計卡片 -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ total_questions }}</div>
+      <div class="stat-label">題庫題數</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ total_sessions }}</div>
+      <div class="stat-label">測驗次數</div>
+    </div>
+    <div class="stat-card" id="avgScoreCard">
+      <div class="stat-value" id="avgScore">—</div>
+      <div class="stat-label">平均分數</div>
+    </div>
+  </div>
+
+  <!-- 開始測驗區 -->
+  <div class="section-card">
+    <h3 class="section-title">
+      <span class="section-icon">📝</span>開始測驗
+    </h3>
+
+    <!-- 出題數量 -->
+    <div class="setting-group">
+      <label class="setting-label">出題數量</label>
+      <div class="count-selector">
+        <button class="count-btn" onclick="setCount(10)">10題</button>
+        <button class="count-btn active" onclick="setCount(20)">20題</button>
+        <button class="count-btn" onclick="setCount(30)">30題</button>
+        <button class="count-btn" onclick="setCount(50)">50題</button>
+      </div>
+      <input type="hidden" id="quizCount" value="20">
+    </div>
+
+    <!-- 測驗模式 -->
+    <div class="setting-group">
+      <label class="setting-label">測驗模式</label>
+      <div class="mode-selector">
+        <div class="mode-card active" id="modeRandom" onclick="selectMode('random')">
+          <div class="mode-icon">🎲</div>
+          <div class="mode-name">隨機出題</div>
+          <div class="mode-desc">全題庫隨機</div>
+        </div>
+        <div class="mode-card" id="modeUnit" onclick="selectMode('unit')">
+          <div class="mode-icon">📚</div>
+          <div class="mode-name">單元測驗</div>
+          <div class="mode-desc">指定單元</div>
+        </div>
+        <div class="mode-card" id="modeWeak" onclick="selectMode('weak')">
+          <div class="mode-icon">🎯</div>
+          <div class="mode-name">弱點加強</div>
+          <div class="mode-desc">針對弱項</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 單元選擇（只在unit模式顯示） -->
+    <div class="setting-group hidden" id="unitSelector">
+      <label class="setting-label">選擇單元</label>
+
+      <!-- 搜尋框 -->
+      <div class="unit-search-wrap">
+        <input type="text" id="unitSearch" class="input-field"
+               placeholder="🔍 輸入關鍵字搜尋單元…"
+               oninput="filterUnits(this.value)"
+               autocomplete="off">
+      </div>
+
+      <!-- 單元列表 -->
+      <div class="unit-list" id="unitList">
+        <div class="unit-item active" data-value="all" onclick="selectUnit(this)">
+          <span class="unit-code">全部</span>
+          <span class="unit-name">全部單元隨機出題</span>
+        </div>
+        {% for unit in units %}
+        <div class="unit-item" data-value="{{ unit }}" onclick="selectUnit(this)">
+          <span class="unit-name">{{ unit }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      <input type="hidden" id="selectedUnit" value="all">
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">
+      <span>開始測驗</span>
+      <span class="btn-arrow">→</span>
+    </button>
+  </div>
+
+  <!-- 弱點分析 -->
+  {% if weak_data %}
+  <div class="section-card">
+    <h3 class="section-title">
+      <span class="section-icon">📊</span>弱點分析
+    </h3>
+    {% for w in weak_data %}
+    <div class="weak-item">
+      <div class="weak-header">
+        <span class="weak-unit">{{ w.unit }}</span>
+        <span class="weak-accuracy {% if w.accuracy < 60 %}bad{% elif w.accuracy < 80 %}warn{% else %}good{% endif %}">
+          {{ w.accuracy }}%
+        </span>
+      </div>
+      <div class="weak-bar-bg">
+        <div class="weak-bar {% if w.accuracy < 60 %}bad{% elif w.accuracy < 80 %}warn{% else %}good{% endif %}"
+             style="width: {{ w.accuracy }}%"></div>
+      </div>
+      <div class="weak-detail">答錯 {{ w.wrong }} / 共 {{ w.total }} 題</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- 管理員：載入題庫 -->
+  <div class="section-card admin-section">
+    <h3 class="section-title">
+      <span class="section-icon">⚙️</span>系統管理
+    </h3>
+    <button class="btn-secondary" onclick="loadQuestions()">
+      <span id="loadBtnText">📥 從題庫檔案載入題目</span>
+    </button>
+    <div class="admin-msg" id="loadMsg"></div>
+  </div>
+
+</div>
+
+<script>
+let selectedMode = 'random';
+let quizCount = 20;
+
+function setCount(n) {
+  quizCount = n;
+  document.getElementById('quizCount').value = n;
+  document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function selectMode(mode) {
+  selectedMode = mode;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('mode' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+  document.getElementById('unitSelector').classList.toggle('hidden', mode !== 'unit');
+}
+
+function selectUnit(el) {
+  document.querySelectorAll('.unit-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('selectedUnit').value = el.dataset.value;
+  // 清除搜尋
+  document.getElementById('unitSearch').value = '';
+  filterUnits('');
+}
+
+function filterUnits(keyword) {
+  const kw = keyword.trim().toLowerCase();
+  document.querySelectorAll('.unit-item').forEach(item => {
+    const text = item.textContent.toLowerCase();
+    item.style.display = (!kw || text.includes(kw)) ? '' : 'none';
+  });
+}
+
+function startQuiz() {
+  const unit = selectedMode === 'unit' ? document.getElementById('selectedUnit').value : 'all';
+  sessionStorage.setItem('quizParams', JSON.stringify({
+    mode: selectedMode, unit, count: quizCount,
+    focus_weak: selectedMode === 'weak'
+  }));
+  window.location.href = '/quiz';
+}
+
+async function loadQuestions() {
+  const btn = document.getElementById('loadBtnText');
+  const msg = document.getElementById('loadMsg');
+  btn.textContent = '載入中…';
+  const res = await fetch('/api/load-questions', {method: 'POST'});
+  const data = await res.json();
+  if (data.success) {
+    msg.textContent = `✅ 成功載入 ${data.loaded} 題（略過重複 ${data.skipped} 題）`;
+    msg.style.color = 'var(--gold)';
+    setTimeout(() => location.reload(), 1500);
+  } else {
+    msg.textContent = `❌ ${data.error}`;
+    msg.style.color = '#f85149';
+  }
+  btn.textContent = '📥 從題庫檔案載入題目';
+}
+
+fetch('/api/stats').then(r => r.json()).then(d => {
+  document.getElementById('avgScore').textContent = d.avg_score ? d.avg_score + '%' : '—';
+});
+</script>
+{% endblock %}

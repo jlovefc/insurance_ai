@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% block title %}主控台 | 保險員證照考試平台{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+
+  <!-- 歡迎區 -->
+  <div class="welcome-section">
+    <div class="welcome-text">
+      <p class="welcome-greeting">歡迎回來</p>
+      <h2 class="welcome-name">{{ user.username }}</h2>
+    </div>
+    <div class="welcome-badge">
+      <span class="badge-icon">🎯</span>
+    </div>
+  </div>
+
+  <!-- 統計卡片 -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-value">{{ total_questions }}</div>
+      <div class="stat-label">題庫題數</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ total_sessions }}</div>
+      <div class="stat-label">測驗次數</div>
+    </div>
+    <div class="stat-card" id="avgScoreCard">
+      <div class="stat-value" id="avgScore">—</div>
+      <div class="stat-label">平均分數</div>
+    </div>
+  </div>
+
+  {# ★ Batch B 新增:收藏 / 精熟數量小顯示 #}
+  <div class="stats-row">
+    <div class="stat-card stat-mini">
+      <div class="stat-value" style="color:var(--gold,#C9A243)">⭐ {{ favorite_count }}</div>
+      <div class="stat-label">收藏題</div>
+    </div>
+    <div class="stat-card stat-mini">
+      <div class="stat-value" style="color:#3FB950">🎯 {{ mastered_count }}</div>
+      <div class="stat-label">已精熟</div>
+    </div>
+  </div>
+
+  <!-- 開始測驗區 -->
+  <div class="section-card">
+    <h3 class="section-title">
+      <span class="section-icon">📝</span>開始測驗
+    </h3>
+
+    <!-- 出題數量 -->
+    <div class="setting-group">
+      <label class="setting-label">出題數量</label>
+      <div class="count-selector">
+        <button class="count-btn" onclick="setCount(3, event)">3題</button>
+        <button class="count-btn" onclick="setCount(5, event)">5題</button>
+        <button class="count-btn active" onclick="setCount(10, event)">10題</button>
+        <button class="count-btn" onclick="setCount(20, event)">20題</button>
+        <button class="count-btn" onclick="setCount(30, event)">30題</button>
+        <button class="count-btn" onclick="setCount(50, event)">50題</button>
+      </div>
+      <input type="hidden" id="quizCount" value="10">
+    </div>
+
+    <!-- 測驗模式 -->
+    <div class="setting-group">
+      <label class="setting-label">測驗模式</label>
+      <div class="mode-selector">
+        <div class="mode-card active" id="modeRandom" onclick="selectMode('random')">
+          <div class="mode-icon">🎲</div>
+          <div class="mode-name">隨機出題</div>
+          <div class="mode-desc">全題庫隨機</div>
+        </div>
+        <div class="mode-card" id="modeUnit" onclick="selectMode('unit')">
+          <div class="mode-icon">📚</div>
+          <div class="mode-name">範圍出題</div>
+          <div class="mode-desc">指定科目章節</div>
+        </div>
+        <div class="mode-card" id="modeWeak" onclick="selectMode('weak')">
+          <div class="mode-icon">🎯</div>
+          <div class="mode-name">弱點加強</div>
+          <div class="mode-desc">針對弱項</div>
+        </div>
+        {# ★ Batch B 新增:收藏題模式 #}
+        <div class="mode-card" id="modeFavorite" onclick="selectMode('favorite')">
+          <div class="mode-icon">⭐</div>
+          <div class="mode-name">收藏題</div>
+          <div class="mode-desc">複習收藏</div>
+        </div>
+      </div>
+    </div>
+
+    {# ★ Batch B:科目 + 章節兩階下拉(只在 unit 模式顯示) #}
+    <div class="setting-group hidden" id="unitSelector">
+      <label class="setting-label">選擇範圍</label>
+
+      <!-- 科目下拉 -->
+      <select id="subjectSelect" class="input-field" onchange="onSubjectChange()" style="margin-bottom:8px">
+        <option value="all">全部科目</option>
+        {% for subj in subject_unit_map.keys() %}
+        <option value="{{ subj }}">{{ subj }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- 章節搜尋 -->
+      <div class="unit-search-wrap">
+        <input type="text" id="unitSearch" class="input-field"
+               placeholder="🔍 輸入關鍵字搜尋章節…"
+               oninput="filterUnits(this.value)"
+               autocomplete="off">
+      </div>
+
+      <!-- 章節列表 -->
+      <div class="unit-list" id="unitList">
+        <div class="unit-item active" data-value="all" onclick="selectUnit(this)">
+          <span class="unit-name">全部章節隨機出題</span>
+        </div>
+        {# 預設顯示所有章節,選了科目後會用 JS 重新渲染 #}
+        {% for subj, units_in_subj in subject_unit_map.items() %}
+          {% for unit in units_in_subj %}
+            <div class="unit-item" data-value="{{ unit }}" data-subject="{{ subj }}" onclick="selectUnit(this)">
+              <span class="unit-name">{{ unit }}</span>
+              <span class="unit-code" style="font-size:11px;color:var(--text-3,#888);margin-left:6px">{{ subj }}</span>
+            </div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+      <input type="hidden" id="selectedUnit" value="all">
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">
+      <span>開始測驗</span>
+      <span class="btn-arrow">→</span>
+    </button>
+  </div>
+
+  <!-- 弱點分析 -->
+  {% if weak_data %}
+  <div class="section-card">
+    <h3 class="section-title">
+      <span class="section-icon">📊</span>弱點分析
+    </h3>
+    {% for w in weak_data %}
+    <div class="weak-item">
+      <div class="weak-header">
+        <span class="weak-unit">{{ w.unit }}</span>
+        <span class="weak-accuracy {% if w.accuracy < 60 %}bad{% elif w.accuracy < 80 %}warn{% else %}good{% endif %}">
+          {{ w.accuracy }}%
+        </span>
+      </div>
+      <div class="weak-bar-bg">
+        <div class="weak-bar {% if w.accuracy < 60 %}bad{% elif w.accuracy < 80 %}warn{% else %}good{% endif %}"
+             style="width: {{ w.accuracy }}%"></div>
+      </div>
+      <div class="weak-detail">答錯 {{ w.wrong }} / 共 {{ w.total }} 題</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- 管理員:載入題庫 -->
+  <div class="section-card admin-section">
+    <h3 class="section-title">
+      <span class="section-icon">⚙️</span>系統管理
+    </h3>
+    <button class="btn-secondary" onclick="loadQuestions()">
+      <span id="loadBtnText">📥 從題庫檔案載入題目</span>
+    </button>
+    <div class="admin-msg" id="loadMsg"></div>
+  </div>
+
+</div>
+
+<script>
+let selectedMode = 'random';
+let quizCount = 10;
+let selectedSubject = 'all';
+
+// ★ Batch B:把 subject_unit_map 帶入前端,動態渲染章節列表
+const subjectUnitMap = {{ subject_unit_map | tojson }};
+
+function setCount(n, evt) {
+  quizCount = n;
+  document.getElementById('quizCount').value = n;
+  document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+  if (evt && evt.target) evt.target.classList.add('active');
+}
+
+function selectMode(mode) {
+  selectedMode = mode;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+  const cap = mode.charAt(0).toUpperCase() + mode.slice(1);
+  const el = document.getElementById('mode' + cap);
+  if (el) el.classList.add('active');
+  // 只有「範圍出題」才顯示範圍選擇
+  document.getElementById('unitSelector').classList.toggle('hidden', mode !== 'unit');
+}
+
+// ★ Batch B 新增:科目切換時過濾章節
+function onSubjectChange() {
+  selectedSubject = document.getElementById('subjectSelect').value;
+  document.querySelectorAll('.unit-item').forEach(item => {
+    const val = item.dataset.value;
+    const subj = item.dataset.subject;
+    if (val === 'all') { item.style.display = ''; return; }
+    if (selectedSubject === 'all' || subj === selectedSubject) {
+      item.style.display = '';
+    } else {
+      item.style.display = 'none';
+    }
+  });
+  // 重設章節選擇為「全部」
+  document.querySelectorAll('.unit-item').forEach(i => i.classList.remove('active'));
+  const all = document.querySelector('.unit-item[data-value="all"]');
+  if (all) {
+    all.classList.add('active');
+    document.getElementById('selectedUnit').value = 'all';
+  }
+  document.getElementById('unitSearch').value = '';
+}
+
+function selectUnit(el) {
+  document.querySelectorAll('.unit-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('selectedUnit').value = el.dataset.value;
+  document.getElementById('unitSearch').value = '';
+  filterUnits('');
+}
+
+function filterUnits(keyword) {
+  const kw = keyword.trim().toLowerCase();
+  document.querySelectorAll('.unit-item').forEach(item => {
+    const val = item.dataset.value;
+    const subj = item.dataset.subject;
+    // 兼顧科目篩選 + 文字搜尋
+    const subjectMatch = (val === 'all') || (selectedSubject === 'all' || subj === selectedSubject);
+    const text = item.textContent.toLowerCase();
+    const keywordMatch = !kw || text.includes(kw);
+    item.style.display = (subjectMatch && keywordMatch) ? '' : 'none';
+  });
+}
+
+function startQuiz() {
+  let params;
+  if (selectedMode === 'favorite') {
+    // ★ Batch B 新增:收藏題模式
+    params = { mode: 'favorite', count: quizCount, focus_favorite: true };
+  } else if (selectedMode === 'weak') {
+    params = { mode: 'weak', count: quizCount, focus_weak: true };
+  } else if (selectedMode === 'unit') {
+    params = {
+      mode: 'unit',
+      subject: selectedSubject,
+      unit: document.getElementById('selectedUnit').value,
+      count: quizCount
+    };
+  } else {
+    params = { mode: 'random', count: quizCount };
+  }
+  sessionStorage.setItem('quizParams', JSON.stringify(params));
+  window.location.href = '/quiz';
+}
+
+async function loadQuestions() {
+  const btn = document.getElementById('loadBtnText');
+  const msg = document.getElementById('loadMsg');
+  btn.textContent = '載入中…';
+  const res = await fetch('/api/load-questions', {method: 'POST'});
+  const data = await res.json();
+  if (data.success) {
+    let detail = '';
+    if (data.files && data.files.length > 1) {
+      detail = '\n各檔:' + data.files.map(f => `${f.file}(載入 ${f.loaded}, 略過 ${f.skipped})`).join('; ');
+    }
+    msg.textContent = `✅ 成功載入 ${data.loaded} 題(略過重複 ${data.skipped} 題)${detail}`;
+    msg.style.color = 'var(--gold)';
+    setTimeout(() => location.reload(), 2000);
+  } else {
+    msg.textContent = `❌ ${data.error}`;
+    msg.style.color = '#f85149';
+  }
+  btn.textContent = '📥 從題庫檔案載入題目';
+}
+
+fetch('/api/stats').then(r => r.json()).then(d => {
+  document.getElementById('avgScore').textContent = d.avg_score ? d.avg_score + '%' : '—';
+});
+</script>
+{% endblock %}

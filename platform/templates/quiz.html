@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}測驗 | 保險員證照考試平台{% endblock %}
+{% block navbar %}{% endblock %}
+{% block content %}
+<div class="quiz-header">
+  <button class="quiz-back-btn" onclick="confirmBack()">✕</button>
+  <div class="quiz-progress-info">
+    <span id="progressText">第 1 題 / 共 — 題</span>
+    {# ★ Batch C: 即時計分顯示 #}
+    <span class="quiz-score-inline" id="scoreInline">
+      <span class="sc-correct" id="scCorrect">✓ 0</span>
+      <span class="sc-sep">·</span>
+      <span class="sc-wrong" id="scWrong">✗ 0</span>
+    </span>
+  </div>
+  <div class="quiz-timer" id="timer">00:00</div>
+</div>
+<div class="progress-track">
+  <div class="progress-fill" id="progressFill" style="width:0%"></div>
+</div>
+<div class="quiz-body" id="quizBody">
+  <div class="loading-state" id="loadingState">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">正在準備題目…</p>
+  </div>
+  <div class="question-area hidden" id="questionArea">
+    <div class="question-meta">
+      <span class="question-unit" id="questionUnit">單元</span>
+      <span class="question-num" id="questionNum">Q1</span>
+    </div>
+    <div class="question-text" id="questionText"></div>
+    <div class="options-list" id="optionsList"></div>
+    <div class="answer-feedback hidden" id="answerFeedback">
+      <div class="feedback-result" id="feedbackResult"></div>
+      <div class="feedback-correct" id="feedbackCorrect"></div>
+      {# ★ Batch C: 教材原解說 (有則顯示,無則跳過) #}
+      <div class="feedback-explain hidden" id="feedbackExplain">
+        <div class="feedback-explain-label">💡 解說</div>
+        <div class="feedback-explain-text" id="feedbackExplainText"></div>
+      </div>
+    </div>
+    {# ★ Batch C: 收藏 / 精熟 / 下一題 #}
+        <div class="userexp-area" id="userExpArea"></div>
+    <div class="quiz-actions hidden" id="quizActions">
+      <button class="btn-mark btn-favorite" id="btnFavorite" onclick="toggleMark('favorite')">
+        <span class="mark-icon">⭐</span>
+        <span class="mark-label">收藏</span>
+      </button>
+      <button class="btn-mark btn-mastered" id="btnMastered" onclick="toggleMark('mastered')">
+        <span class="mark-icon">🎯</span>
+        <span class="mark-label">精熟</span>
+      </button>
+      <button class="btn-next" id="nextBtn" onclick="nextQuestion()">下一題 →</button>
+    </div>
+  </div>
+  <div class="quiz-done hidden" id="quizDone">
+    <div class="done-icon">🎉</div>
+    <h2 class="done-title">測驗完成!</h2>
+    <div class="done-score-wrap">
+      <div class="done-score" id="doneScore">—</div>
+      <div class="done-label">答對率</div>
+    </div>
+    <div class="done-detail" id="doneDetail"></div>
+    <button class="btn-primary" id="viewReportBtn" onclick="viewReport()">查看詳細報告</button>
+    <button class="btn-secondary" onclick="window.location.href='/dashboard'">回到主控台</button>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='quiz.js') }}"></script>
+{% endblock %}

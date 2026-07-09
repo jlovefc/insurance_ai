@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block title %}測驗 | 保險員證照考試平台{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="quiz-header">
+  <button class="quiz-back-btn" onclick="confirmBack()">✕</button>
+  <div class="quiz-progress-info"><span id="progressText">第 1 題 / 共 — 題</span></div>
+  <div class="quiz-timer" id="timer">00:00</div>
+</div>
+<div class="progress-track">
+  <div class="progress-fill" id="progressFill" style="width:0%"></div>
+</div>
+
+<div class="quiz-body" id="quizBody">
+  <div class="loading-state" id="loadingState">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">正在準備題目…</p>
+  </div>
+
+  <div class="question-area hidden" id="questionArea">
+    <div class="question-meta">
+      <span class="question-unit" id="questionUnit">單元</span>
+      <span class="question-num" id="questionNum">Q1</span>
+    </div>
+    <div class="question-text" id="questionText"></div>
+    <div class="options-list" id="optionsList"></div>
+    <div class="answer-feedback hidden" id="answerFeedback">
+      <div class="feedback-result" id="feedbackResult"></div>
+      <div class="feedback-correct" id="feedbackCorrect"></div>
+    </div>
+    <div class="quiz-actions hidden" id="quizActions">
+      <button class="btn-explain" onclick="openExplanation()">💡 深入解說</button>
+      <button class="btn-next" id="nextBtn" onclick="nextQuestion()">下一題 →</button>
+    </div>
+  </div>
+
+  <div class="quiz-done hidden" id="quizDone">
+    <div class="done-icon">🎉</div>
+    <h2 class="done-title">測驗完成！</h2>
+    <div class="done-score-wrap">
+      <div class="done-score" id="doneScore">—</div>
+      <div class="done-label">答對率</div>
+    </div>
+    <div class="done-detail" id="doneDetail"></div>
+    <button class="btn-primary" id="viewReportBtn" onclick="viewReport()">查看詳細報告</button>
+    <button class="btn-secondary" onclick="window.location.href='/dashboard'">回到主控台</button>
+  </div>
+</div>
+
+<!-- 解說 Modal -->
+<div class="modal-overlay hidden" id="explainModal">
+  <div class="modal-sheet" id="modalSheet">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeExplanation()">✕</button>
+
+    <!-- TTS -->
+    <div class="tts-bar">
+      <button class="tts-btn" id="ttsBtn" onclick="toggleTTS()">
+        <span id="ttsIcon">🔊</span>
+        <span id="ttsLabel">朗讀解說</span>
+      </button>
+      <div class="tts-speed">
+        <label>速度</label>
+        <select id="ttsSpeed" onchange="updateTTSSpeed()">
+          <option value="0.8">慢速</option>
+          <option value="1.0" selected>正常</option>
+          <option value="1.25">快速</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="etab-bar">
+      <button class="etab-btn active" id="etab-summary" onclick="switchExplainTab('summary')">📋 重點</button>
+      <button class="etab-btn" id="etab-mindmap" onclick="switchExplainTab('mindmap')">🧠 心智圖</button>
+      <button class="etab-btn" id="etab-analogy" onclick="switchExplainTab('analogy')">💡 比喻</button>
+    </div>
+
+    <!-- Panels -->
+    <div id="panelSummary" class="etab-panel"></div>
+    <div id="panelMindmap" class="etab-panel" style="display:none"></div>
+    <div id="panelAnalogy" class="etab-panel" style="display:none"></div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='quiz.js') }}"></script>
+{% endblock %}

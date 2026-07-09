@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}測驗報告 | 保險員證照考試平台{% endblock %}
+{% block content %}
+{% set correct = answers | selectattr('is_correct') | list | length %}
+{% set total = answers | length %}
+{% set pct = (correct / total * 100) | round | int if total > 0 else 0 %}
+
+{# ★ Batch C: 5 級評語 #}
+{% if pct == 100 %}
+  {% set verdict_icon = '🏆' %}
+  {% set verdict_main = '滿分!太強了' %}
+  {% set verdict_sub = '保持這個水準,證照穩穩拿' %}
+  {% set hero_class = 'hero-pass' %}
+{% elif pct >= 80 %}
+  {% set verdict_icon = '🎉' %}
+  {% set verdict_main = '優秀,繼續保持' %}
+  {% set verdict_sub = '已經達到證照及格門檻,再衝刺一下' %}
+  {% set hero_class = 'hero-pass' %}
+{% elif pct >= 60 %}
+  {% set verdict_icon = '👍' %}
+  {% set verdict_main = '及格,但還有進步空間' %}
+  {% set verdict_sub = '針對錯誤的章節再多練幾輪' %}
+  {% set hero_class = 'hero-mid' %}
+{% elif pct >= 40 %}
+  {% set verdict_icon = '💪' %}
+  {% set verdict_main = '加油,離及格還有距離' %}
+  {% set verdict_sub = '建議複習教材後再回來練習' %}
+  {% set hero_class = 'hero-fail' %}
+{% else %}
+  {% set verdict_icon = '📚' %}
+  {% set verdict_main = '別氣餒,從基礎開始' %}
+  {% set verdict_sub = '建議從單一章節練起,別貪多' %}
+  {% set hero_class = 'hero-fail' %}
+{% endif %}
+
+<div class="report-page">
+  <!-- 分數英雄區 -->
+  <div class="score-hero {{ hero_class }}">
+    <div class="score-ring">
+      <svg viewBox="0 0 120 120" class="ring-svg">
+        <circle cx="60" cy="60" r="52" class="ring-bg"/>
+        <circle cx="60" cy="60" r="52" class="ring-fill"
+                style="stroke-dasharray: {{ (pct / 100 * 326.7) | round(1) }} 326.7"/>
+      </svg>
+      <div class="score-inner">
+        <div class="score-pct">{{ pct }}%</div>
+        <div class="score-sub">{{ correct }}/{{ total }}</div>
+      </div>
+    </div>
+    <div class="score-verdict">
+      {{ verdict_icon }} {{ verdict_main }}
+    </div>
+    <div class="score-verdict-sub" style="margin-top:6px;font-size:13px;opacity:0.8">
+      {{ verdict_sub }}
+    </div>
+    <div class="score-meta">
+      <span>{{ quiz_session.unit_name }}</span>
+      <span>·</span>
+      <span>{{ quiz_session.start_time.strftime('%Y/%m/%d %H:%M') if quiz_session.start_time else '' }}</span>
+    </div>
+  </div>
+
+  <!-- 累計弱點分析 -->
+  {% if weak_data %}
+  <div class="section-card">
+    <h3 class="section-title"><span class="section-icon">📊</span>累計弱點分析</h3>
+    {% for w in weak_data %}
+    <div class="weak-item">
+      <div class="weak-header">
+        <span class="weak-unit">{{ w.unit }}</span>
+        <span class="weak-accuracy {% if w.accuracy < 60 %}bad{% elif w.accuracy < 80 %}warn{% else %}good{% endif %}">
+          {{ w.accuracy }}%
+        </span>
+      </div>
+      <div class="weak-bar-bg">
+        <div class="weak-bar {% if w.accuracy < 60 %}bad{% elif w.accuracy < 80 %}warn{% else %}good{% endif %}"
+             style="width: {{ w.accuracy }}%"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- 題目詳解 -->
+  <div class="section-card">
+    <h3 class="section-title"><span class="section-icon">📋</span>題目詳解</h3>
+    {% for ans in answers %}
+    {% set q = ans.question %}
+    <div class="review-item {% if ans.is_correct %}correct{% else %}wrong{% endif %}">
+      <div class="review-header">
+        <span class="review-badge {% if ans.is_correct %}correct{% else %}wrong{% endif %}">
+          {% if ans.is_correct %}✓{% else %}✗{% endif %}
+        </span>
+        <span class="review-unit">{{ q.unit }}</span>
+      </div>
+      <div class="review-question">{{ q.content }}</div>
+      {% if not ans.is_correct %}
+      <div class="review-answers">
+        <div class="review-user">你的答案:{{ ans.user_answer }}</div>
+        <div class="review-correct">正確答案:{{ q.correct_answer }}</div>
+      </div>
+      {% endif %}
+      {# ★ Batch C: 不管答對答錯都顯示解說(教材原解說) #}
+      {% if q.explanation %}
+      <div class="review-explain">
+        <div class="review-explain-label">💡 解說</div>
+        <div class="review-explain-text">{{ q.explanation }}</div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- 操作按鈕 -->
+  <div class="report-actions">
+    <button class="btn-primary" onclick="window.location.href='/dashboard'">回到主控台</button>
+    <button class="btn-secondary" onclick="window.print()">📄 列印報告</button>
+  </div>
+</div>
+{% endblock %}

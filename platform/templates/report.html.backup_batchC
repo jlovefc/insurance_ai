@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}測驗報告 | 保險員證照考試平台{% endblock %}
+
+{% block content %}
+{% set correct = answers | selectattr('is_correct') | list | length %}
+{% set total = answers | length %}
+{% set pct = (correct / total * 100) | round | int if total > 0 else 0 %}
+
+<div class="report-page">
+
+  <!-- 分數英雄區 -->
+  <div class="score-hero {% if pct >= 80 %}hero-pass{% elif pct >= 60 %}hero-mid{% else %}hero-fail{% endif %}">
+    <div class="score-ring">
+      <svg viewBox="0 0 120 120" class="ring-svg">
+        <circle cx="60" cy="60" r="52" class="ring-bg"/>
+        <circle cx="60" cy="60" r="52" class="ring-fill"
+                style="stroke-dasharray: {{ (pct / 100 * 326.7) | round(1) }} 326.7"/>
+      </svg>
+      <div class="score-inner">
+        <div class="score-pct">{{ pct }}%</div>
+        <div class="score-sub">{{ correct }}/{{ total }}</div>
+      </div>
+    </div>
+    <div class="score-verdict">
+      {% if pct >= 80 %}🏆 優秀！繼續保持
+      {% elif pct >= 60 %}👍 及格，還需加強
+      {% else %}💪 加油！針對弱項複習
+      {% endif %}
+    </div>
+    <div class="score-meta">
+      <span>{{ quiz_session.unit_name }}</span>
+      <span>·</span>
+      <span>{{ quiz_session.start_time.strftime('%Y/%m/%d %H:%M') if quiz_session.start_time else '' }}</span>
+    </div>
+  </div>
+
+  <!-- 弱點分析 -->
+  {% if weak_data %}
+  <div class="section-card">
+    <h3 class="section-title"><span class="section-icon">📊</span>累計弱點分析</h3>
+    {% for w in weak_data %}
+    <div class="weak-item">
+      <div class="weak-header">
+        <span class="weak-unit">{{ w.unit }}</span>
+        <span class="weak-accuracy {% if w.accuracy < 60 %}bad{% elif w.accuracy < 80 %}warn{% else %}good{% endif %}">
+          {{ w.accuracy }}%
+        </span>
+      </div>
+      <div class="weak-bar-bg">
+        <div class="weak-bar {% if w.accuracy < 60 %}bad{% elif w.accuracy < 80 %}warn{% else %}good{% endif %}"
+             style="width: {{ w.accuracy }}%"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- 題目詳解 -->
+  <div class="section-card">
+    <h3 class="section-title"><span class="section-icon">📋</span>題目詳解</h3>
+    {% for ans in answers %}
+    {% set q = ans.question %}
+    <div class="review-item {% if ans.is_correct %}correct{% else %}wrong{% endif %}">
+      <div class="review-header">
+        <span class="review-badge {% if ans.is_correct %}correct{% else %}wrong{% endif %}">
+          {% if ans.is_correct %}✓{% else %}✗{% endif %}
+        </span>
+        <span class="review-unit">{{ q.unit }}</span>
+      </div>
+      <div class="review-question">{{ q.content }}</div>
+      {% if not ans.is_correct %}
+      <div class="review-answers">
+        <div class="review-user">你的答案：{{ ans.user_answer }}</div>
+        <div class="review-correct">正確答案：{{ q.correct_answer }}</div>
+      </div>
+      {% if q.explanation %}
+      <div class="review-explain">
+        <div class="review-explain-label">💡 解說</div>
+        <div class="review-explain-text">{{ q.explanation }}</div>
+      </div>
+      {% endif %}
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- 操作按鈕 -->
+  <div class="report-actions">
+    <button class="btn-primary" onclick="window.location.href='/dashboard'">回到主控台</button>
+    <button class="btn-secondary" onclick="window.print()">📄 列印報告</button>
+  </div>
+
+</div>
+{% endblock %}
