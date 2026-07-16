@@ -57,9 +57,10 @@
 
 ## 五、目前已確認案例
 
-| case_id | question_id | subject | unit | source | source_page | source_question_no | current_answer | source_answer | expected_answer | error_types | status | fix_target | notes |
-|---|---:|---|---|---|---|---:|---|---|---|---|---|---|---|
-| CORR-20260716-0001 | 3815 | B 保險實務-分類 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.89 | 18 | 3 | 1 | 1 | `wrong_answer`, `ocr_parse_error`, `option_pollution`, `explanation_missing` | `confirmed_by_source` | `all_questions.json` id=3815；SQLite `questions.id`=3815 | 原稿右側答案欄為 1。系統誤將解析尾端「何者正確答案就會是 3」抓為正式答案，且第 4 選項被解析文字污染。已於第一批 JY 單元逐題原稿校對試跑再次確認；試跑狀態為 `confirmed_by_source`，後續進入 `ready_to_fix`，但尚未修改正式題庫。不得混同 SQLite ID 2670。 |
+| case_id | question_id | subject | unit | source | source_page | source_question_no | current_answer | source_answer | expected_answer | error_types | status | next_status | fix_target | notes |
+|---|---:|---|---|---|---|---:|---|---|---|---|---|---|---|---|
+| CORR-20260716-0001 | 3815 | B 保險實務-分類 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.89 | 18 | 3 | 1 | 1 | `wrong_answer`, `ocr_parse_error`, `option_pollution`, `explanation_missing` | `confirmed_by_source` | `ready_to_fix` | `all_questions.json` id=3815；SQLite `questions.id`=3815 | 原稿右側答案欄為 1。系統誤將解析尾端「何者正確答案就會是 3」抓為正式答案，且第 4 選項被解析文字污染。已於第一批 JY 單元逐題原稿校對試跑再次確認；尚未修改正式題庫。不得混同 SQLite ID 2670。 |
+| CORR-20260716-0002 | 3785 | B 保險實務-分類 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.90 | 34 | 4 | 4 | 4 | `option_pollution`, `truncated_question` | `confirmed_by_source` | `ready_to_fix` | `all_questions.json` id=3785；SQLite `questions.id`=3785 | 原稿確認第 4 選項為 ABCD，「，而有差別。」屬於題幹句尾。系統目前將「，而有差別。」錯誤併入第 4 選項，造成題幹截斷與選項污染。此題不是答案錯誤，不得標記為 `wrong_answer`；尚未修改正式題庫。 |
 
 ### CORR-20260716-0001 證據文件
 
@@ -70,6 +71,27 @@
 - 試跑狀態：`confirmed_by_source`。
 - 後續狀態：`ready_to_fix`；此狀態只表示證據與修正建議已具備，尚未修改 SQLite 或 `all_questions.json`，不得標記為 `fixed`。
 
+### CORR-20260716-0002 證據與建議修正
+
+- 個案修正紀錄：`docs/corrections/id3785_jy_p90_reserve_option_pollution_correction_20260716.md`
+- 人工目視工作表：`docs/answer_audit/jy_unit03_manual_review_worklist_20260716.md`，JY-U03-MR-010
+- 第一批試跑報告：`docs/answer_audit/jy_unit03_premium_reserve_dividend_trial_audit_20260716.md`
+- 原稿：`input/JY-人身保險.pdf` P.90 第 34 題
+- 目前狀態：`confirmed_by_source`
+- 後續狀態：`ready_to_fix`
+- 修正界線：只限 ID 3785；答案維持 4，不得標記為 `wrong_answer`。
+
+建議修正內容：
+
+```text
+content = "責任準備金計算與提存牽涉複雜的精算技術與法令規定，會因保險契約之 A.保險期間；B.繳費方式；C.契約生效日；D.繳費期間，而有差別。"
+options = ["ABD", "BD", "ABC", "ABCD"]
+correct_answer = "4"
+explanation = ""
+```
+
+上述內容尚未套用至 SQLite 或 `all_questions.json`。
+
 ## 六、第一批 JY 單元試跑發現摘要
 
 - 依據報告：`docs/answer_audit/jy_unit03_premium_reserve_dividend_trial_audit_20260716.md`
@@ -79,9 +101,9 @@
 - 無法對應正式題庫：14 題。
 - 答案一致：38 題。
 - 答案不一致：1 題，Q18／ID 3815。
-- 正式題庫選項污染：確認 1 題；含候選共 2 題。
+- 正式題庫選項污染：確認 2 題（ID 3815、ID 3785）；兩題均尚未修正。
 - 中間 JSON 選項或解析污染：8 題。
-- 需人工目視：15 題。
+- 原列需人工目視：15 題；ID 3785 已完成並升級，剩餘 14 題。
 - `output/JY-人身保險.json` 僅收錄 17 題，漏掉 P.89 Q6 及 P.90–P.92 全部題目。
 
 ### 1. 待人工目視清單
@@ -97,7 +119,7 @@
 | 29 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
 | 31 | P.90 | 未對應 | `source_mapping_error`, `truncated_question` | `manual_review` | raw 題幹前置詞排序異常，正式題庫無對應。 |
 | 32 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
-| 34 | P.90 | 3785 | `option_pollution` | `manual_review` | 第 4 選項含「而有差別」；需目視確認該文字是否屬題幹尾語。 |
+| 34 | P.90 | 3785 | `option_pollution`, `truncated_question` | `confirmed_by_source` | 已完成目視並升級為 CORR-20260716-0002；第 4 選項應為 ABCD，「，而有差別。」屬題幹句尾。尚未修改正式題庫。 |
 | 35 | P.91 | 未對應 | `source_mapping_error`, `outdated_law` | `manual_review` | 正式題庫無對應，且涉及歷史法規時點。 |
 | 36 | P.91 | 未對應 | `source_mapping_error`, `outdated_law` | `manual_review` | 正式題庫無對應，且涉及歷史法規時點。 |
 | 46 | P.91 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
@@ -145,7 +167,7 @@
 | question_id | source_question_no | source_page | status | fix_target | note |
 |---:|---:|---:|---|---|---|
 | 3815 | 18 | P.89 | `ready_to_fix` | `all_questions.json` id=3815；SQLite `questions.id`=3815 | 已由原稿及第一批試跑再次確認；第 4 選項併入解析，答案亦誤為 3。尚未修改正式題庫。 |
-| 3785 | 34 | P.90 | `manual_review` | `all_questions.json` id=3785；SQLite `questions.id`=3785 | 第 4 選項含「而有差別」；需先目視確認是否為題幹尾語，不得直接修正。 |
+| 3785 | 34 | P.90 | `ready_to_fix` | `all_questions.json` id=3785；SQLite `questions.id`=3785 | 已升級為 CORR-20260716-0002，不再只是候選。原稿已確認第 4 選項為 ABCD，「，而有差別。」屬題幹句尾；尚未修改正式題庫。 |
 
 ### 5. 第一批試跑後續處理原則
 
@@ -153,11 +175,16 @@
 2. 漏題候選不得直接新增，需人工確認是否屬於正式題庫範圍。
 3. 中間 JSON 污染不等於正式題庫錯誤，需確認是否已污染 `all_questions.json` 或 SQLite。
 4. 所有 `ready_to_fix` 題目修正前，都需備份 SQLite 與 `all_questions.json`。
-5. 第一批後續應先人工目視 15 題 `manual_review`／`source_needed`，再決定哪些案例升級為 `confirmed_by_source`。
+5. 第一批原列 15 題中，ID 3785 已升級為 `confirmed_by_source`／`ready_to_fix`；其餘 14 題應先人工目視，再決定哪些案例升級。
+6. 本次只更新 ledger，不修題庫。
+7. ID 3815 與 ID 3785 可列入下一批 `ready_to_fix`。
+8. 修正前必須備份 SQLite 與 `all_questions.json`。
+9. 修正時只允許修改已 `confirmed_by_source` 且 `ready_to_fix` 的題目。
+10. 修正後需驗證 Web 顯示。
 
 ## 七、後續待查清單
 
-以下項目目前只列入調查範圍。除 ID 3815 外，未因列入本清單而判定答案錯誤。
+以下項目目前只列入調查範圍。ID 3815 與 ID 3785 已另列正式確認案例；其餘項目未因列入本清單而判定答案或結構錯誤。
 
 ### 1. 第三章 OCR／切割疑點
 
@@ -188,12 +215,12 @@
 
 ### 5. 第一批逐題原稿校對試跑範圍
 
-- 狀態：試跑報告已完成；15 題待人工目視
+- 狀態：試跑報告已完成；原列 15 題中 ID 3785 已確認，剩餘 14 題待人工目視
 - 原稿：`input/JY-人身保險.pdf`
 - 單元：三、保險費架構、解約金、準備金、保單紅利
 - 範圍：P.89–P.92，Q1–Q53
 - 試跑報告：`docs/answer_audit/jy_unit03_premium_reserve_dividend_trial_audit_20260716.md`
-- 後續動作：依本文件第六節清單人工目視 15 題，確認漏題範圍與選項污染候選，不得直接修題庫。
+- 後續動作：依本文件第六節清單人工目視剩餘 14 題，確認漏題範圍；不得直接修題庫。
 
 ## 八、後續批次修正流程
 
