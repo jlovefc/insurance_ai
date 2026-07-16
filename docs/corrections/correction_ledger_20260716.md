@@ -59,16 +59,103 @@
 
 | case_id | question_id | subject | unit | source | source_page | source_question_no | current_answer | source_answer | expected_answer | error_types | status | fix_target | notes |
 |---|---:|---|---|---|---|---:|---|---|---|---|---|---|---|
-| CORR-20260716-0001 | 3815 | B 保險實務-分類 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.89 | 18 | 3 | 1 | 1 | `wrong_answer`, `ocr_parse_error`, `option_pollution` | `confirmed_by_source` | `all_questions.json` id=3815；SQLite `questions.id`=3815 | 原稿右側答案欄為 1。系統誤將解析尾端「何者正確答案就會是 3」抓為正式答案，且第 4 選項被解析文字污染。不得混同 SQLite ID 2670。 |
+| CORR-20260716-0001 | 3815 | B 保險實務-分類 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.89 | 18 | 3 | 1 | 1 | `wrong_answer`, `ocr_parse_error`, `option_pollution`, `explanation_missing` | `confirmed_by_source` | `all_questions.json` id=3815；SQLite `questions.id`=3815 | 原稿右側答案欄為 1。系統誤將解析尾端「何者正確答案就會是 3」抓為正式答案，且第 4 選項被解析文字污染。已於第一批 JY 單元逐題原稿校對試跑再次確認；試跑狀態為 `confirmed_by_source`，後續進入 `ready_to_fix`，但尚未修改正式題庫。不得混同 SQLite ID 2670。 |
 
 ### CORR-20260716-0001 證據文件
 
 - 個案修正紀錄：`docs/corrections/id3815_jy_p89_term_insurance_answer_correction_20260716.md`
+- 第一批試跑報告：`docs/answer_audit/jy_unit03_premium_reserve_dividend_trial_audit_20260716.md`
 - 原稿：`input/JY-人身保險.pdf` P.89 第 18 題
 - 流程規格：`docs/answer_audit/source_based_chapter_unit_question_audit_workflow_20260716.md`
-- 目前狀態說明：已確認來源與預期答案，尚未修改 SQLite 或 `all_questions.json`，因此不得標記為 `fixed`。
+- 試跑狀態：`confirmed_by_source`。
+- 後續狀態：`ready_to_fix`；此狀態只表示證據與修正建議已具備，尚未修改 SQLite 或 `all_questions.json`，不得標記為 `fixed`。
 
-## 六、後續待查清單
+## 六、第一批 JY 單元試跑發現摘要
+
+- 依據報告：`docs/answer_audit/jy_unit03_premium_reserve_dividend_trial_audit_20260716.md`
+- 原稿範圍：P.89–P.92，Q1–Q53。
+- 題目總數：53 題。
+- 成功對應 SQLite／`all_questions.json`：39 題。
+- 無法對應正式題庫：14 題。
+- 答案一致：38 題。
+- 答案不一致：1 題，Q18／ID 3815。
+- 正式題庫選項污染：確認 1 題；含候選共 2 題。
+- 中間 JSON 選項或解析污染：8 題。
+- 需人工目視：15 題。
+- `output/JY-人身保險.json` 僅收錄 17 題，漏掉 P.89 Q6 及 P.90–P.92 全部題目。
+
+### 1. 待人工目視清單
+
+| source_question_no | source_page | sqlite_id | issue_type | status | note |
+|---:|---:|---|---|---|---|
+| 12 | P.89 | 未對應 | `source_mapping_error`, `explanation_missing` | `manual_review` | output 題幹嚴重亂碼，計算解析併入第 4 選項；正式題庫無記錄。 |
+| 14 | P.89 | 未對應 | `source_mapping_error`, `truncated_question` | `manual_review` | output 題幹嚴重污染；正式題庫無記錄。 |
+| 19 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，output、正式快照及 SQLite 均無對應。 |
+| 22 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
+| 24 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
+| 28 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
+| 29 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
+| 31 | P.90 | 未對應 | `source_mapping_error`, `truncated_question` | `manual_review` | raw 題幹前置詞排序異常，正式題庫無對應。 |
+| 32 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
+| 34 | P.90 | 3785 | `option_pollution` | `manual_review` | 第 4 選項含「而有差別」；需目視確認該文字是否屬題幹尾語。 |
+| 35 | P.91 | 未對應 | `source_mapping_error`, `outdated_law` | `manual_review` | 正式題庫無對應，且涉及歷史法規時點。 |
+| 36 | P.91 | 未對應 | `source_mapping_error`, `outdated_law` | `manual_review` | 正式題庫無對應，且涉及歷史法規時點。 |
+| 46 | P.91 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
+| 47 | P.91 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
+| 49 | P.91 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
+
+`source_needed` 在本表表示原稿題目已定位，但尚需人工確認其是否屬於應納入的正式題庫範圍；完成判斷前不得新增題目。
+
+### 2. 漏題候選清單
+
+| source_question_no | source_page | source_answer | reason | status | next_action |
+|---:|---:|---:|---|---|---|
+| 12 | P.89 | 2 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 14 | P.89 | 1 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 19 | P.90 | 3 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 22 | P.90 | 1 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 24 | P.90 | 3 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 28 | P.90 | 3 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 29 | P.90 | 1 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 31 | P.90 | 3 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 32 | P.90 | 4 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 35 | P.91 | 3 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 36 | P.91 | 1 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 46 | P.91 | 1 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 47 | P.91 | 3 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 49 | P.91 | 2 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+
+### 3. 中間 JSON 污染清單
+
+`json_record` 為 `output/JY-人身保險.json` 的零起算陣列索引；該檔記錄本身沒有 id。
+
+| source_question_no | source_page | json_record | issue_type | status | note |
+|---:|---:|---:|---|---|---|
+| 2 | P.89 | 177 | `ocr_parse_error`, `option_pollution` | `source_found` | output 第 4 選項含轉檔警告；正式題庫目前已清除。 |
+| 4 | P.89 | 179 | `ocr_parse_error`, `option_pollution` | `source_found` | output 第 3 選項空白、第 4 選項為異源亂碼；正式題庫完整。 |
+| 7 | P.89 | 181 | `ocr_parse_error`, `option_pollution` | `source_found` | output 第 1、2 選項為異源亂碼；正式題庫完整。 |
+| 9 | P.89 | 183 | `ocr_parse_error`, `option_pollution` | `source_found` | output 多個選項含異源亂碼；正式題庫完整。 |
+| 10 | P.89 | 184 | `ocr_parse_error`, `option_pollution` | `source_found` | output 第 3 選項空白；正式題庫完整。 |
+| 12 | P.89 | 186 | `ocr_parse_error`, `explanation_pollution` | `manual_review` | output 題幹嚴重亂碼，計算解析併入第 4 選項；正式題庫無對應。 |
+| 15 | P.89 | 189 | `ocr_parse_error`, `option_pollution` | `source_found` | output 第 4 選項含異源亂碼；正式題庫完整。 |
+| 18 | P.89 | 192 | `ocr_parse_error`, `option_pollution`, `explanation_pollution` | `confirmed_by_source` | 解析併入第 4 選項，並進一步污染正式題庫 ID 3815。 |
+
+### 4. 正式題庫選項污染確認與候選
+
+| question_id | source_question_no | source_page | status | fix_target | note |
+|---:|---:|---:|---|---|---|
+| 3815 | 18 | P.89 | `ready_to_fix` | `all_questions.json` id=3815；SQLite `questions.id`=3815 | 已由原稿及第一批試跑再次確認；第 4 選項併入解析，答案亦誤為 3。尚未修改正式題庫。 |
+| 3785 | 34 | P.90 | `manual_review` | `all_questions.json` id=3785；SQLite `questions.id`=3785 | 第 4 選項含「而有差別」；需先目視確認是否為題幹尾語，不得直接修正。 |
+
+### 5. 第一批試跑後續處理原則
+
+1. 本次只登記，不修題庫。
+2. 漏題候選不得直接新增，需人工確認是否屬於正式題庫範圍。
+3. 中間 JSON 污染不等於正式題庫錯誤，需確認是否已污染 `all_questions.json` 或 SQLite。
+4. 所有 `ready_to_fix` 題目修正前，都需備份 SQLite 與 `all_questions.json`。
+5. 第一批後續應先人工目視 15 題 `manual_review`／`source_needed`，再決定哪些案例升級為 `confirmed_by_source`。
+
+## 七、後續待查清單
 
 以下項目目前只列入調查範圍。除 ID 3815 外，未因列入本清單而判定答案錯誤。
 
@@ -101,13 +188,14 @@
 
 ### 5. 第一批逐題原稿校對試跑範圍
 
-- 狀態：`source_found`
+- 狀態：試跑報告已完成；15 題待人工目視
 - 原稿：`input/JY-人身保險.pdf`
 - 單元：三、保險費架構、解約金、準備金、保單紅利
-- 範圍：該單元全部題目；實際頁碼範圍由後續唯讀盤點確認
-- 後續動作：建立原稿題號清單，逐題對應 SQLite 與 `all_questions.json`，輸出答案、選項及解析差異，不得直接修題庫。
+- 範圍：P.89–P.92，Q1–Q53
+- 試跑報告：`docs/answer_audit/jy_unit03_premium_reserve_dividend_trial_audit_20260716.md`
+- 後續動作：依本文件第六節清單人工目視 15 題，確認漏題範圍與選項污染候選，不得直接修題庫。
 
-## 七、後續批次修正流程
+## 八、後續批次修正流程
 
 1. 逐題追蹤原稿、頁碼、題號或法規來源。
 2. 由人工目視確認來源內容與系統差異。
