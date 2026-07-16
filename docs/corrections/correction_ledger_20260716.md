@@ -92,6 +92,29 @@ explanation = ""
 
 上述內容尚未套用至 SQLite 或 `all_questions.json`。
 
+### MISS-20260716-0001 漏題候選案例
+
+| 欄位 | 內容 |
+|---|---|
+| case_id | `MISS-20260716-0001` |
+| source_question_no | 12 |
+| sqlite_id | 未對應 |
+| json_id | 未對應 |
+| subject | B 保險實務-分類候選 |
+| unit | 03 保險費架構、解約金、準備金、保單紅利 |
+| source | `input/JY-人身保險.pdf` / JY價值筆記 |
+| source_page | P.89 |
+| source_answer | 2 |
+| expected_answer | 2 |
+| issue_type | `source_mapping_error` |
+| status | `confirmed_by_source` |
+| next_status | `pending_inclusion_review` |
+| fix_target | 尚未決定；不得直接補入 SQLite 或 `all_questions.json` |
+| evidence_file | `docs/corrections/p89_q12_jy_premium_calculation_missing_candidate_20260716.md` |
+| notes | 原稿 P.89 Q12 已人工目視確認，右側答案欄為 2，解析為 `10000 × 2/1000 = 20人`、`20 × 1000000 / 10000 = 2000`。正式 SQLite 與 `all_questions.json` 目前未成功對應此題。此題暫列漏題候選，需先建立補題規則與正式收錄範圍判定，不得直接新增。 |
+
+此案例的 `confirmed_by_source` 僅表示原稿題目、答案與解析已確認，不代表已核准納入正式題庫，也不得進入 `ready_to_fix`。
+
 ## 六、第一批 JY 單元試跑發現摘要
 
 - 依據報告：`docs/answer_audit/jy_unit03_premium_reserve_dividend_trial_audit_20260716.md`
@@ -103,14 +126,14 @@ explanation = ""
 - 答案不一致：1 題，Q18／ID 3815。
 - 正式題庫選項污染：確認 2 題（ID 3815、ID 3785）；兩題均尚未修正。
 - 中間 JSON 選項或解析污染：8 題。
-- 原列需人工目視：15 題；ID 3785 已完成並升級，剩餘 14 題。
+- 原列需人工目視：15 題；ID 3785 已完成並升級，P.89 Q12 已確認為漏題候選 `MISS-20260716-0001`，剩餘 13 題。
 - `output/JY-人身保險.json` 僅收錄 17 題，漏掉 P.89 Q6 及 P.90–P.92 全部題目。
 
 ### 1. 待人工目視清單
 
 | source_question_no | source_page | sqlite_id | issue_type | status | note |
 |---:|---:|---|---|---|---|
-| 12 | P.89 | 未對應 | `source_mapping_error`, `explanation_missing` | `manual_review` | output 題幹嚴重亂碼，計算解析併入第 4 選項；正式題庫無記錄。 |
+| 12 | P.89 | 未對應 | `source_mapping_error` | `confirmed_by_source` | 已確認為漏題候選 `MISS-20260716-0001`，自剩餘 manual_review 清單移出；尚未判定是否補入正式題庫。 |
 | 14 | P.89 | 未對應 | `source_mapping_error`, `truncated_question` | `manual_review` | output 題幹嚴重污染；正式題庫無記錄。 |
 | 19 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，output、正式快照及 SQLite 均無對應。 |
 | 22 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
@@ -132,7 +155,7 @@ explanation = ""
 
 | source_question_no | source_page | source_answer | reason | status | next_action |
 |---:|---:|---:|---|---|---|
-| 12 | P.89 | 2 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 12 | P.89 | 2 | 原稿有題，但正式題庫未成功對應；已有原稿確認紀錄 | `confirmed_by_source` | `next_status = pending_inclusion_review`；尚未判定是否補入正式題庫，依 `MISS-20260716-0001` 進行收錄審查 |
 | 14 | P.89 | 1 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
 | 19 | P.90 | 3 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
 | 22 | P.90 | 1 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
@@ -158,7 +181,7 @@ explanation = ""
 | 7 | P.89 | 181 | `ocr_parse_error`, `option_pollution` | `source_found` | output 第 1、2 選項為異源亂碼；正式題庫完整。 |
 | 9 | P.89 | 183 | `ocr_parse_error`, `option_pollution` | `source_found` | output 多個選項含異源亂碼；正式題庫完整。 |
 | 10 | P.89 | 184 | `ocr_parse_error`, `option_pollution` | `source_found` | output 第 3 選項空白；正式題庫完整。 |
-| 12 | P.89 | 186 | `ocr_parse_error`, `explanation_pollution` | `manual_review` | output 題幹嚴重亂碼，計算解析併入第 4 選項；正式題庫無對應。 |
+| 12 | P.89 | 186 | `ocr_parse_error`, `explanation_pollution` | `confirmed_by_source` | 原稿已確認並登記為 `MISS-20260716-0001`；output 題幹嚴重亂碼且計算解析併入第 4 選項，正式題庫仍無對應。 |
 | 15 | P.89 | 189 | `ocr_parse_error`, `option_pollution` | `source_found` | output 第 4 選項含異源亂碼；正式題庫完整。 |
 | 18 | P.89 | 192 | `ocr_parse_error`, `option_pollution`, `explanation_pollution` | `confirmed_by_source` | 解析併入第 4 選項，並進一步污染正式題庫 ID 3815。 |
 
@@ -172,15 +195,19 @@ explanation = ""
 ### 5. 第一批試跑後續處理原則
 
 1. 本次只登記，不修題庫。
-2. 漏題候選不得直接新增，需人工確認是否屬於正式題庫範圍。
+2. 漏題候選不得直接新增到正式題庫，需人工確認是否屬於正式題庫範圍。
 3. 中間 JSON 污染不等於正式題庫錯誤，需確認是否已污染 `all_questions.json` 或 SQLite。
 4. 所有 `ready_to_fix` 題目修正前，都需備份 SQLite 與 `all_questions.json`。
-5. 第一批原列 15 題中，ID 3785 已升級為 `confirmed_by_source`／`ready_to_fix`；其餘 14 題應先人工目視，再決定哪些案例升級。
+5. 第一批原列 15 題中，ID 3785 已升級為 `confirmed_by_source`／`ready_to_fix`，P.89 Q12 已升級為漏題候選 `confirmed_by_source`／`pending_inclusion_review`；其餘 13 題應先人工目視，再決定後續狀態。
 6. 本次只更新 ledger，不修題庫。
 7. ID 3815 與 ID 3785 可列入下一批 `ready_to_fix`。
 8. 修正前必須備份 SQLite 與 `all_questions.json`。
 9. 修正時只允許修改已 `confirmed_by_source` 且 `ready_to_fix` 的題目。
 10. 修正後需驗證 Web 顯示。
+11. 補題前需建立新題 ID 分配規則。
+12. 補題前需確認是否已有改寫題或等價題。
+13. 補題前需定義 `all_questions.json` 與 SQLite 同步規則，補題後需進行 Web 驗證。
+14. 目前 `ready_to_fix` 僅限已確認且已有既有 ID 的修正題，不包含漏題候選。
 
 ## 七、後續待查清單
 
@@ -215,12 +242,12 @@ explanation = ""
 
 ### 5. 第一批逐題原稿校對試跑範圍
 
-- 狀態：試跑報告已完成；原列 15 題中 ID 3785 已確認，剩餘 14 題待人工目視
+- 狀態：試跑報告已完成；原列 15 題中 ID 3785 已確認為既有題修正案例，P.89 Q12 已確認為漏題候選，剩餘 13 題待人工目視
 - 原稿：`input/JY-人身保險.pdf`
 - 單元：三、保險費架構、解約金、準備金、保單紅利
 - 範圍：P.89–P.92，Q1–Q53
 - 試跑報告：`docs/answer_audit/jy_unit03_premium_reserve_dividend_trial_audit_20260716.md`
-- 後續動作：依本文件第六節清單人工目視剩餘 14 題，確認漏題範圍；不得直接修題庫。
+- 後續動作：依本文件第六節清單人工目視剩餘 13 題，確認漏題範圍；不得直接修題庫。
 
 ## 八、後續批次修正流程
 
