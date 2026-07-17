@@ -138,6 +138,29 @@ explanation = ""
 
 此案例的 `confirmed_by_source` 僅表示原稿題目、答案與人工校核結果已確認，不代表已核准納入正式題庫，也不得進入 `ready_to_fix`。
 
+### MISS-20260716-0003 漏題候選案例
+
+| 欄位 | 內容 |
+|---|---|
+| case_id | `MISS-20260716-0003` |
+| source_question_no | 31 |
+| sqlite_id | 未對應 |
+| json_id | 未對應 |
+| subject | B 保險實務-分類候選 |
+| unit | 03 保險費架構、解約金、準備金、保單紅利 |
+| source | `input/JY-人身保險.pdf` / JY價值筆記 |
+| source_page | P.90 |
+| source_answer | 3 |
+| expected_answer | 3 |
+| issue_type | `source_mapping_error` / `truncated_question` |
+| status | `confirmed_by_source` |
+| next_status | `pending_inclusion_review` |
+| fix_target | 尚未決定；不得直接補入 SQLite 或 `all_questions.json` |
+| evidence_file | `docs/corrections/p90_q31_jy_reserve_missing_candidate_20260716.md` |
+| notes | 原稿 P.90 Q31 已人工目視確認，右側答案欄為 3。此題為選項在前、敘述在後的特殊結構，選項為 (1)解約金、(2)保單紅利、(3)責任準備金、(4)保單價值準備金。題幹描述將純保險費扣除已經過危險保費後的資金提存保管，並按保險種類計算、記載於特設帳簿，概念對應責任準備金，因此原稿答案 (3) 合理。正式 SQLite 與 `all_questions.json` 目前未成功對應此題。此題暫列漏題候選，需先建立補題規則與正式收錄範圍判定，不得直接新增。 |
+
+此案例的 `confirmed_by_source` 僅表示原稿題目、答案與特殊題型結構已確認，不代表已核准納入正式題庫，也不得進入 `ready_to_fix`。
+
 ## 六、第一批 JY 單元試跑發現摘要
 
 - 依據報告：`docs/answer_audit/jy_unit03_premium_reserve_dividend_trial_audit_20260716.md`
@@ -149,7 +172,7 @@ explanation = ""
 - 答案不一致：1 題，Q18／ID 3815。
 - 正式題庫選項污染：確認 2 題（ID 3815、ID 3785）；兩題均尚未修正。
 - 中間 JSON 選項或解析污染：8 題。
-- 原列需人工目視：15 題；ID 3785 已完成並升級，P.89 Q12、Q14 已分別確認為漏題候選 `MISS-20260716-0001`、`MISS-20260716-0002`，剩餘 12 題。
+- 原列需人工目視：15 題；ID 3785 已完成並升級，P.89 Q12、Q14 與 P.90 Q31 已分別確認為漏題候選 `MISS-20260716-0001`、`MISS-20260716-0002`、`MISS-20260716-0003`，剩餘 11 題。
 - `output/JY-人身保險.json` 僅收錄 17 題，漏掉 P.89 Q6 及 P.90–P.92 全部題目。
 
 ### 1. 待人工目視清單
@@ -163,7 +186,7 @@ explanation = ""
 | 24 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
 | 28 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
 | 29 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
-| 31 | P.90 | 未對應 | `source_mapping_error`, `truncated_question` | `manual_review` | raw 題幹前置詞排序異常，正式題庫無對應。 |
+| 31 | P.90 | 未對應 | `source_mapping_error`, `truncated_question` | `confirmed_by_source` | 已確認為漏題候選 `MISS-20260716-0003`，自剩餘 manual_review 清單移出；題型為選項在前、敘述在後，尚未判定是否補入正式題庫。 |
 | 32 | P.90 | 未對應 | `source_mapping_error` | `source_needed` | 原稿有題，正式題庫無對應。 |
 | 34 | P.90 | 3785 | `option_pollution`, `truncated_question` | `confirmed_by_source` | 已完成目視並升級為 CORR-20260716-0002；第 4 選項應為 ABCD，「，而有差別。」屬題幹句尾。尚未修改正式題庫。 |
 | 35 | P.91 | 未對應 | `source_mapping_error`, `outdated_law` | `manual_review` | 正式題庫無對應，且涉及歷史法規時點。 |
@@ -185,7 +208,7 @@ explanation = ""
 | 24 | P.90 | 3 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
 | 28 | P.90 | 3 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
 | 29 | P.90 | 1 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
-| 31 | P.90 | 3 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
+| 31 | P.90 | 3 | 原稿有題，但正式題庫未成功對應；已有原稿確認紀錄，題型為選項在前、敘述在後 | `confirmed_by_source` | `next_status = pending_inclusion_review`；尚未判定是否補入正式題庫，依 `MISS-20260716-0003` 進行收錄審查 |
 | 32 | P.90 | 4 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
 | 35 | P.91 | 3 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
 | 36 | P.91 | 1 | 原稿有題，但正式題庫未成功對應 | `source_found` | 人工確認是否應補入正式題庫 |
@@ -221,7 +244,7 @@ explanation = ""
 2. 漏題候選不得直接新增到正式題庫，需人工確認是否屬於正式題庫範圍。
 3. 中間 JSON 污染不等於正式題庫錯誤，需確認是否已污染 `all_questions.json` 或 SQLite。
 4. 所有 `ready_to_fix` 題目修正前，都需備份 SQLite 與 `all_questions.json`。
-5. 第一批原列 15 題中，ID 3785 已升級為 `confirmed_by_source`／`ready_to_fix`，P.89 Q12、Q14 已升級為漏題候選 `confirmed_by_source`／`pending_inclusion_review`；其餘 12 題應先人工目視，再決定後續狀態。
+5. 第一批原列 15 題中，ID 3785 已升級為 `confirmed_by_source`／`ready_to_fix`，P.89 Q12、Q14 與 P.90 Q31 已升級為漏題候選 `confirmed_by_source`／`pending_inclusion_review`；其餘 11 題應先人工目視，再決定後續狀態。
 6. 本次只更新 ledger，不修題庫。
 7. ID 3815 與 ID 3785 可列入下一批 `ready_to_fix`。
 8. 修正前必須備份 SQLite 與 `all_questions.json`。
@@ -265,12 +288,12 @@ explanation = ""
 
 ### 5. 第一批逐題原稿校對試跑範圍
 
-- 狀態：試跑報告已完成；原列 15 題中 ID 3785 已確認為既有題修正案例，P.89 Q12、Q14 已確認為漏題候選，剩餘 12 題待人工目視
+- 狀態：試跑報告已完成；原列 15 題中 ID 3785 已確認為既有題修正案例，P.89 Q12、Q14 與 P.90 Q31 已確認為漏題候選，剩餘 11 題待人工目視
 - 原稿：`input/JY-人身保險.pdf`
 - 單元：三、保險費架構、解約金、準備金、保單紅利
 - 範圍：P.89–P.92，Q1–Q53
 - 試跑報告：`docs/answer_audit/jy_unit03_premium_reserve_dividend_trial_audit_20260716.md`
-- 後續動作：依本文件第六節清單人工目視剩餘 12 題，確認漏題範圍；不得直接修題庫。
+- 後續動作：依本文件第六節清單人工目視剩餘 11 題，確認漏題範圍；不得直接修題庫。
 
 ## 八、後續批次修正流程
 
