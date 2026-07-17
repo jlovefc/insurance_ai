@@ -98,8 +98,8 @@ explanation = ""
 |---|---|
 | case_id | `MISS-20260716-0001` |
 | source_question_no | 12 |
-| sqlite_id | 未對應 |
-| json_id | 未對應 |
+| sqlite_id | 4137 |
+| json_id | 4137 |
 | subject | B 保險實務-分類候選 |
 | unit | 03 保險費架構、解約金、準備金、保單紅利 |
 | source | `input/JY-人身保險.pdf` / JY價值筆記 |
@@ -108,12 +108,18 @@ explanation = ""
 | expected_answer | 2 |
 | issue_type | `source_mapping_error` |
 | status | `confirmed_by_source` |
-| next_status | `pending_inclusion_review` |
-| fix_target | 尚未決定；不得直接補入 SQLite 或 `all_questions.json` |
+| next_status | `applied` |
+| fix_target | `all_questions.json` id=4137；SQLite `questions.id`=4137（已新增） |
 | evidence_file | `docs/corrections/p89_q12_jy_premium_calculation_missing_candidate_20260716.md` |
-| notes | 原稿 P.89 Q12 已人工目視確認，右側答案欄為 2，解析為 `10000 × 2/1000 = 20人`、`20 × 1000000 / 10000 = 2000`。正式 SQLite 與 `all_questions.json` 目前未成功對應此題。此題暫列漏題候選，需先建立補題規則與正式收錄範圍判定，不得直接新增。 |
+| 補入結果 | 已正式補入 |
+| new_question_id | 4137 |
+| all_questions.json | 已新增 |
+| SQLite questions | 已新增 |
+| inclusion_status | `applied` |
+| apply_note | 由受控腳本 `tools/apply_missing_questions_4136_4137.py --apply` 執行。 |
+| notes | 原稿 P.89 Q12 已人工目視確認，右側答案欄為 2，解析為 `10000 × 2/1000 = 20人`、`20 × 1000000 / 10000 = 2000`。完成等價題審核、ID mapping、備份及 dry-run 後，已正式同步新增為 JSON／SQLite ID 4137。 |
 
-此案例的 `confirmed_by_source` 僅表示原稿題目、答案與解析已確認，不代表已核准納入正式題庫，也不得進入 `ready_to_fix`。
+此案例保留 `confirmed_by_source` 作為原稿證據狀態；補題流程已另經審核並完成，`inclusion_status = applied`。本案例未使用 `ready_to_fix` 狀態。
 
 ### MISS-20260716-0002 漏題候選案例
 
@@ -167,7 +173,7 @@ explanation = ""
 
 | case_id | source_question_no | sqlite_id | json_id | subject | unit | source | source_page | source_answer | expected_answer | issue_type | status | next_status | fix_target | evidence_file | notes |
 |---|---:|---|---|---|---|---|---:|---:|---:|---|---|---|---|---|---|
-| `MISS-20260716-0004` | 19 | 未對應 | 未對應 | B 保險實務-分類候選 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.90 | 3 | 3 | `source_mapping_error` | `confirmed_by_source` | `pending_inclusion_review` | 尚未決定；不得直接補入 SQLite 或 `all_questions.json` | `docs/corrections/p90_q19_jy_missing_candidate_20260716.md` | 截圖確認題幹、四個選項及右側答案 3；正式題庫未對應。 |
+| `MISS-20260716-0004` | 19 | 4136 | 4136 | B 保險實務-分類候選 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.90 | 3 | 3 | `source_mapping_error` | `confirmed_by_source` | `applied` | `all_questions.json` id=4136；SQLite `questions.id`=4136（已新增） | `docs/corrections/p90_q19_jy_missing_candidate_20260716.md` | 補入結果：已正式補入；new_question_id：4136；`all_questions.json`：已新增；SQLite `questions`：已新增；inclusion_status：`applied`。由受控腳本 `tools/apply_missing_questions_4136_4137.py --apply` 執行。 |
 | `MISS-20260716-0005` | 22 | 未對應 | 未對應 | B 保險實務-分類候選 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.90 | 1 | 1 | `source_mapping_error` | `confirmed_by_source` | `pending_inclusion_review` | 尚未決定；不得直接補入 SQLite 或 `all_questions.json` | `docs/corrections/p90_q22_jy_missing_candidate_20260716.md` | 截圖確認解約金敘述、組合選項及右側答案 1；正式題庫未對應。 |
 | `MISS-20260716-0006` | 24 | 未對應 | 未對應 | B 保險實務-分類候選 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.90 | 3 | 3 | `source_mapping_error` | `confirmed_by_source` | `pending_inclusion_review` | 尚未決定；不得直接補入 SQLite 或 `all_questions.json` | `docs/corrections/p90_q24_jy_missing_candidate_20260716.md` | 截圖確認準備金計算基礎、組合選項及右側答案 3；正式題庫未對應。 |
 | `MISS-20260716-0007` | 28 | 未對應 | 未對應 | B 保險實務-分類候選 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.90 | 3 | 3 | `source_mapping_error` | `confirmed_by_source` | `pending_inclusion_review` | 尚未決定；不得直接補入 SQLite 或 `all_questions.json` | `docs/corrections/p90_q28_jy_missing_candidate_20260716.md` | 截圖確認預定利率／死亡率敘述、組合選項及右側答案 3；正式題庫未對應。 |
@@ -179,7 +185,7 @@ explanation = ""
 | `MISS-20260716-0013` | 47 | 未對應 | 未對應 | B 保險實務-分類候選 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.91 | 3 | 3 | `source_mapping_error` | `confirmed_by_source` | `pending_inclusion_review` | 尚未決定；不得直接補入 SQLite 或 `all_questions.json` | `docs/corrections/p91_q47_jy_missing_candidate_20260716.md` | 截圖確認四種紅利支付方法、組合選項及右側答案 3；正式題庫未對應。 |
 | `MISS-20260716-0014` | 49 | 未對應 | 未對應 | B 保險實務-分類候選 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.91 | 2 | 2 | `source_mapping_error` | `confirmed_by_source` | `pending_inclusion_review` | 尚未決定；不得直接補入 SQLite 或 `all_questions.json` | `docs/corrections/p91_q49_jy_missing_candidate_20260716.md` | 截圖確認儲存生息情境、四個選項及右側答案 2；正式題庫未對應。 |
 
-上述 11 題均只升級為漏題候選 `confirmed_by_source`／`pending_inclusion_review`，不屬於 `ready_to_fix`，不得直接補入正式題庫。
+上述案例中，僅 `MISS-20260716-0004` 已另經等價題審核、ID mapping、備份及受控腳本流程正式補入為 ID 4136；其餘 10 題仍維持漏題候選 `confirmed_by_source`／`pending_inclusion_review`，不屬於 `ready_to_fix`，不得直接補入正式題庫。
 
 ## 六、第一批 JY 單元試跑發現摘要
 
