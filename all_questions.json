@@ -53606,5 +53606,18 @@
       "4仟元"
     ],
     "correct_answer": "2"
+  },
+  {
+    "id": 4138,
+    "subject": "B 保險實務-分類",
+    "unit": "03 保險費架構、解約金、準備金、保單紅利",
+    "content": "保單紅利支付的方法有？",
+    "options": [
+      "BCD",
+      "ACD",
+      "ABCD",
+      "ABC"
+    ],
+    "correct_answer": "3"
   }
 ]
