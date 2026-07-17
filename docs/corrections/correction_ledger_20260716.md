@@ -61,8 +61,8 @@
 |---|---:|---|---|---|---|---:|---|---|---|---|---|---|---|---|
 | CORR-20260716-0001 | 3815 | B 保險實務-分類 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.89 | 18 | 3 | 1 | 1 | `wrong_answer`, `ocr_parse_error`, `option_pollution`, `explanation_missing` | `confirmed_by_source` | `ready_to_fix` | `all_questions.json` id=3815；SQLite `questions.id`=3815 | 原稿右側答案欄為 1。系統誤將解析尾端「何者正確答案就會是 3」抓為正式答案，且第 4 選項被解析文字污染。已於第一批 JY 單元逐題原稿校對試跑再次確認；尚未修改正式題庫。不得混同 SQLite ID 2670。 |
 | CORR-20260716-0002 | 3785 | B 保險實務-分類 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.90 | 34 | 4 | 4 | 4 | `option_pollution`, `truncated_question` | `confirmed_by_source` | `ready_to_fix` | `all_questions.json` id=3785；SQLite `questions.id`=3785 | 原稿確認第 4 選項為 ABCD，「，而有差別。」屬於題幹句尾。系統目前將「，而有差別。」錯誤併入第 4 選項，造成題幹截斷與選項污染。此題不是答案錯誤，不得標記為 `wrong_answer`；尚未修改正式題庫。 |
-| CORR-20260716-0003 | 2664 | 保險實務 | 第四章 人身保險的構造 | JY P.90 Q28 | P.90 | 28 | 1 | 3 | 3 | `wrong_answer`, `duplicate_conflict`, `explanation_conflict` | `confirmed_by_source` | `ready_to_fix` | `all_questions.json` id=2664；SQLite `questions.id`=2664 | 原稿與等價題 ID2197 均支持 AD；ID2664 現行答案 BC 與解析自相矛盾。 |
-| CORR-20260716-0004 | 2654 | 保險實務 | 第四章 人身保險的構造 | JY P.91 Q49 | P.91 | 49 | 1 | 2 | 3 | `wrong_answer`, `duplicate_conflict`, `explanation_conflict` | `confirmed_by_source` | `ready_to_fix` | `all_questions.json` id=2654；SQLite `questions.id`=2654 | 原稿與等價題 ID2336 均支持「一樣」；ID2654 現行答案「高」係將累積紅利總給付與保險金額混同。 |
+| CORR-20260716-0003 | 2664 | 保險實務 | 第四章 人身保險的構造 | JY P.90 Q28 | P.90 | 28 | 1 | 3 | 3 | `wrong_answer`, `duplicate_conflict`, `explanation_conflict` | `fixed` | `applied` | `all_questions.json` id=2664；SQLite `questions.id`=2664（已修正） | 原稿與等價題 ID2197 均支持 AD；已由受控腳本同步修正答案與 SQLite 解析。 |
+| CORR-20260716-0004 | 2654 | 保險實務 | 第四章 人身保險的構造 | JY P.91 Q49 | P.91 | 49 | 1 | 2 | 3 | `wrong_answer`, `duplicate_conflict`, `explanation_conflict` | `fixed` | `applied` | `all_questions.json` id=2654；SQLite `questions.id`=2654（已修正） | 原稿與等價題 ID2336 均支持「一樣」；已由受控腳本同步修正答案與 SQLite 解析。 |
 
 ### CORR-20260716-0001 證據文件
 
@@ -101,8 +101,13 @@ explanation = ""
 - current_answer：`"1"`（BC）
 - expected_answer：`"3"`（AD）
 - issue_type：`wrong_answer / duplicate_conflict / explanation_conflict`
-- status：`confirmed_by_source`
-- next_status：`ready_to_fix`
+- status：`fixed`
+- correction_status：`applied`
+- all_questions.json：已修正
+- SQLite questions：已修正
+- fixed_question_id：2664
+- apply_script：`tools/apply_existing_question_corrections_2664_2654.py`
+- closeout_file：`docs/answer_audit/existing_question_corrections_2664_2654_apply_closeout_20260716.md`
 - evidence_file：`docs/corrections/id2664_jy_p90_q28_reserve_assumption_answer_correction_20260716.md`
 - notes：原稿與等價題 ID2197 均支持 AD；ID2664 現行答案 BC 與解析自相矛盾。
 
@@ -117,8 +122,13 @@ explanation = ""
 - current_answer：`"1"`（高）
 - expected_answer：`"3"`（一樣）
 - issue_type：`wrong_answer / duplicate_conflict / explanation_conflict`
-- status：`confirmed_by_source`
-- next_status：`ready_to_fix`
+- status：`fixed`
+- correction_status：`applied`
+- all_questions.json：已修正
+- SQLite questions：已修正
+- fixed_question_id：2654
+- apply_script：`tools/apply_existing_question_corrections_2664_2654.py`
+- closeout_file：`docs/answer_audit/existing_question_corrections_2664_2654_apply_closeout_20260716.md`
 - evidence_file：`docs/corrections/id2654_jy_p91_q49_dividend_interest_answer_correction_20260716.md`
 - notes：原稿與等價題 ID2336 均支持「一樣」；ID2654 現行答案「高」係將累積紅利總給付與保險金額混同。
 
@@ -126,7 +136,7 @@ explanation = ""
 
 > 選擇儲存生息方式給付紅利時，紅利係另行累積生息，並不改變原保單約定的保險金額。因此死亡時所給付之保險金額較原保險金額為一樣；累積紅利若一併給付，屬於保險金額以外的紅利累積給付概念。
 
-CORR-20260716-0003 與 CORR-20260716-0004 均僅完成證據登記，尚未修改正式題庫；正式修正前仍須備份 `all_questions.json` 與 SQLite，並於修正後驗證資料一致性及 Web 顯示。
+CORR-20260716-0003 與 CORR-20260716-0004 已完成備份、受控修正及資料一致性驗證；Web 顯示驗證另行記錄。
 
 ### MISS-20260716-0001 漏題候選案例
 
