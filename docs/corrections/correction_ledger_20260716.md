@@ -63,7 +63,7 @@
 | CORR-20260716-0002 | 3785 | B 保險實務-分類 | 03 保險費架構、解約金、準備金、保單紅利 | `input/JY-人身保險.pdf` / JY價值筆記 | P.90 | 34 | 4 | 4 | 4 | `option_pollution`, `truncated_question` | `confirmed_by_source` | `ready_to_fix` | `all_questions.json` id=3785；SQLite `questions.id`=3785 | 原稿確認第 4 選項為 ABCD，「，而有差別。」屬於題幹句尾。系統目前將「，而有差別。」錯誤併入第 4 選項，造成題幹截斷與選項污染。此題不是答案錯誤，不得標記為 `wrong_answer`；尚未修改正式題庫。 |
 | CORR-20260716-0003 | 2664 | 保險實務 | 第四章 人身保險的構造 | JY P.90 Q28 | P.90 | 28 | 1 | 3 | 3 | `wrong_answer`, `duplicate_conflict`, `explanation_conflict` | `fixed` | `applied` | `all_questions.json` id=2664；SQLite `questions.id`=2664（已修正） | 原稿與等價題 ID2197 均支持 AD；已由受控腳本同步修正答案與 SQLite 解析。 |
 | CORR-20260716-0004 | 2654 | 保險實務 | 第四章 人身保險的構造 | JY P.91 Q49 | P.91 | 49 | 1 | 2 | 3 | `wrong_answer`, `duplicate_conflict`, `explanation_conflict` | `fixed` | `applied` | `all_questions.json` id=2654；SQLite `questions.id`=2654（已修正） | 原稿與等價題 ID2336 均支持「一樣」；已由受控腳本同步修正答案與 SQLite 解析。 |
-| CORR-20260716-0005 | 3840 | B 保險實務-分類 | 04 人身保險之構造 | `input/JY-人身保險.pdf` / JY價值筆記 | P.93 | 13 | 2 | 4 | 4 | `wrong_answer`, `truncated_option`, `source_mapping_error`, `version_review` | `confirmed_by_source` | `ready_to_fix` | `all_questions.json` id=3840；SQLite `questions.id`=3840 | 原稿第4選項為「僅選項2、3為真」，答案為4；正式題庫第4選項遭截斷且答案誤為2。電子保單適用時點審查已通過：民國94年函釋及現行電子商務規範均支持網路投保及電子保單制度，惟仍須符合適用商品、身分驗證及要保人同意等條件。尚未修改正式題庫。 |
+| CORR-20260716-0005 | 3840 | B 保險實務-分類 | 04 人身保險之構造 | `input/JY-人身保險.pdf` / JY價值筆記 | P.93 | 13 | 2 | 4 | 4 | `wrong_answer`, `truncated_option`, `source_mapping_error`, `version_review` | `fixed` | `applied` | `all_questions.json` id=3840；SQLite `questions.id`=3840（已修正） | 原稿第4選項為「僅選項2、3為真」，答案為4；正式題庫已由受控腳本同步修正第4選項、答案及 SQLite 解析。電子保單適用時點審查已通過，適用條件已保留於解析。 |
 
 ### CORR-20260716-0001 證據文件
 
@@ -147,13 +147,16 @@ CORR-20260716-0003 與 CORR-20260716-0004 已完成備份、受控修正及資�
 - source_answer：`"4"`
 - expected_answer：`"4"`
 - issue_type：`wrong_answer / truncated_option / source_mapping_error / version_review`
-- status：`confirmed_by_source`
-- next_status：`ready_to_fix`
+- status：`fixed`
+- correction_status：`applied`
 - evidence_file：`docs/corrections/id3840_jy_p93_q13_electronic_policy_answer_option_correction_20260716.md`
 - version_review_file：`docs/answer_audit/id3840_electronic_policy_version_review_20260716.md`
 - version_review：`passed`
-- fix_target：`all_questions.json` id=3840；SQLite `questions.id`=3840
-- notes：原稿第4選項完整文字為「僅選項2、3為真」，系統第4選項遭截斷，且系統答案誤為2。官方歷史函釋與審查日有效規範均支持紙本與電子保單並存，以及符合規範時得辦理網路投保；版本審查已通過。此狀態僅表示可進入受控修正流程，尚未修改正式題庫。
+- fixed_question_id：3840
+- apply_script：`tools/apply_id3840_electronic_policy_correction.py`
+- closeout_file：`docs/answer_audit/id3840_electronic_policy_correction_apply_closeout_20260716.md`
+- fix_target：`all_questions.json` id=3840；SQLite `questions.id`=3840（已修正）
+- notes：原稿第4選項完整文字為「僅選項2、3為真」，系統原第4選項遭截斷且答案誤為2。官方歷史函釋與審查日有效規範支持紙本與電子保單並存，以及符合規範時得辦理網路投保；版本審查已通過。已由受控腳本同步修正 JSON 與 SQLite，Web 顯示驗證另行記錄。
 
 建議後續修正為：
 
@@ -164,7 +167,7 @@ correct_answer = "4"
 explanation = "依保險業辦理電子商務相關規範，保險業可辦理符合規定之網路投保，並得依要保人指定方式交付紙本或電子保單。因此保單不限於紙本，且符合規範時可透過網路投保簽發電子保單，第2、3項為真，答案為第4項。電子保單仍須符合適用商品、身分驗證、要保人同意及其他相關規範。"
 ```
 
-正式修正前必須備份 `all_questions.json` 與 SQLite，且只允許修改 ID3840；修正後須驗證題數不變、SQLite `integrity_check = ok` 及 Web 顯示正常。
+ID3840 已完成備份、受控修正及資料一致性驗證；題數不變，差異僅 ID3840，SQLite `integrity_check = ok`。Web 顯示驗證另行記錄。
 
 ### MISS-20260716-0001 漏題候選案例
 
