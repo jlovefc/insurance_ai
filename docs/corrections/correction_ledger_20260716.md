@@ -64,6 +64,7 @@
 | CORR-20260716-0003 | 2664 | 保險實務 | 第四章 人身保險的構造 | JY P.90 Q28 | P.90 | 28 | 1 | 3 | 3 | `wrong_answer`, `duplicate_conflict`, `explanation_conflict` | `fixed` | `applied` | `all_questions.json` id=2664；SQLite `questions.id`=2664（已修正） | 原稿與等價題 ID2197 均支持 AD；已由受控腳本同步修正答案與 SQLite 解析。 |
 | CORR-20260716-0004 | 2654 | 保險實務 | 第四章 人身保險的構造 | JY P.91 Q49 | P.91 | 49 | 1 | 2 | 3 | `wrong_answer`, `duplicate_conflict`, `explanation_conflict` | `fixed` | `applied` | `all_questions.json` id=2654；SQLite `questions.id`=2654（已修正） | 原稿與等價題 ID2336 均支持「一樣」；已由受控腳本同步修正答案與 SQLite 解析。 |
 | CORR-20260716-0005 | 3840 | B 保險實務-分類 | 04 人身保險之構造 | `input/JY-人身保險.pdf` / JY價值筆記 | P.93 | 13 | 2 | 4 | 4 | `wrong_answer`, `truncated_option`, `source_mapping_error`, `version_review` | `fixed` | `applied` | `all_questions.json` id=3840；SQLite `questions.id`=3840（已修正） | 原稿第4選項為「僅選項2、3為真」，答案為4；正式題庫已由受控腳本同步修正第4選項、答案及 SQLite 解析。電子保單適用時點審查已通過，適用條件已保留於解析。 |
+| CORR-20260716-0006 | 3835 | B 保險實務-分類 | 04 人身保險意義、功能、分類 | `input/JY-人身保險.pdf` / JY價值筆記 | P.93 | 8 | 3 | 3 | 3 | `option_pollution`, `truncated_question`, `ocr_parse_error` | `confirmed_by_source` | `ready_to_fix` | `all_questions.json` id=3835；SQLite `questions.id`=3835 | 原稿採「句首＋四個主詞選項＋共同句尾」版面；系統將共同句尾全部併入第4選項，造成題幹截斷與選項污染。原稿與系統答案均為3，答案本身正確，不得標記為 `wrong_answer`。尚未修改正式題庫。 |
 
 ### CORR-20260716-0001 證據文件
 
@@ -168,6 +169,31 @@ explanation = "依保險業辦理電子商務相關規範，保險業可辦理�
 ```
 
 ID3840 已完成備份、受控修正及資料一致性驗證；題數不變，差異僅 ID3840，SQLite `integrity_check = ok`。Web 顯示驗證另行記錄。
+
+### CORR-20260716-0006 證據與建議修正
+
+- question_id：3835
+- source：`input/JY-人身保險.pdf` P.93 Q8
+- current_answer：`"3"`
+- source_answer：`"3"`
+- expected_answer：`"3"`
+- issue_type：`option_pollution / truncated_question / ocr_parse_error`
+- status：`confirmed_by_source`
+- next_status：`ready_to_fix`
+- evidence_file：`docs/corrections/id3835_jy_p93_q8_option_pollution_correction_20260716.md`
+- fix_target：`all_questions.json` id=3835；SQLite `questions.id`=3835
+- notes：原稿共同句尾「出極少的錢……保障他本人或親屬安樂的生活」應屬題幹，不屬於第4選項「保險公司的員工」。正式題庫目前將整段共同句尾併入第4選項。答案3與原稿一致，本案只修正題目結構，尚未修改正式題庫。
+
+建議後續修正為：
+
+```text
+content = "人身保險的意義，就是由下列何者出極少的錢，交由人壽保險公司集成龐大的財力，作妥善的管理與運用，在這些人之中，一旦有人發生不幸或約定事故的時候，根據公平合理的制度，給與補償，保障他本人或親屬安樂的生活？"
+options = ["許多窮苦的人們", "少數的社會熱心人士", "千千萬萬的人", "保險公司的員工"]
+correct_answer = "3"
+explanation = ""
+```
+
+正式修正前必須備份 `all_questions.json` 與 SQLite，且只允許修改 ID3835；答案必須維持 `"3"`。修正後須驗證題數不變、SQLite `integrity_check = ok` 及 Web 顯示正常。
 
 ### MISS-20260716-0001 漏題候選案例
 
