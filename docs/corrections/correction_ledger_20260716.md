@@ -459,3 +459,15 @@ ID3835 已完成備份、受控修正及資料一致性驗證；題數不變，�
 10. 經確認後 push，並將案例狀態更新到 `verified`。
 
 任何步驟若發現來源不清、題目映射錯誤或法規版本疑義，應停止該題修正並改列 `deferred` 或重新進入人工複核。
+
+## 九、JY unit04 正式補入記錄：ID4142–4146
+
+下列五題已完成原稿或官方資料審查、等價題檢查、ID mapping、dry-run、備份及受控補入。本區塊不變更其他既有案例。
+
+| source | new_question_id | subject | unit | source_answer | system_answer | status | inclusion_status | apply_script | closeout_file | notes |
+|---|---:|---|---|---:|---:|---|---|---|---|---|
+| JY P.94 Q26 | 4142 | B 保險實務-分類 | 04 人身保險意義、功能、分類 | 4 | 4 | `included` | `applied` | `tools/apply_missing_questions_4142_4146.py` | `docs/answer_audit/jy_unit04_4142_4146_apply_closeout_20260716.md` | 個人功能完整組合題；JSON 與 SQLite 已同步新增。 |
+| JY P.94 Q28 | 4143 | B 保險實務-分類 | 04 人身保險意義、功能、分類 | 4 | 4 | `included` | `applied` | `tools/apply_missing_questions_4142_4146.py` | `docs/answer_audit/jy_unit04_4142_4146_apply_closeout_20260716.md` | 社會功能完整組合題；JSON 與 SQLite 已同步新增。 |
+| JY P.94 Q30 | 4144 | B 保險實務-分類 | 04 人身保險意義、功能、分類 | 1 | 1 | `included` | `applied` | `tools/apply_missing_questions_4142_4146.py` | `docs/answer_audit/jy_unit04_4142_4146_apply_closeout_20260716.md` | 國家功能完整組合題；JSON 與 SQLite 已同步新增。 |
+| JY P.95 Q36 | 4145 | B 保險實務-分類 | 04 人身保險意義、功能、分類 | 3 | 3 | `included` | `applied` | `tools/apply_missing_questions_4142_4146.py` | `docs/answer_audit/jy_unit04_4142_4146_apply_closeout_20260716.md` | 經《保險法》第13條版本化審查後補入；JSON 與 SQLite 已同步新增。 |
+| JY P.95 Q38 | 4146 | B 保險實務-分類 | 04 人身保險意義、功能、分類 | 2 | 2 | `included` | `applied` | `tools/apply_missing_questions_4142_4146.py` | `docs/answer_audit/jy_unit04_4142_4146_apply_closeout_20260716.md` | 以市場商品型態及主管機關商品分類限定題意後補入；JSON 與 SQLite 已同步新增。 |
